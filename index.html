@@ -262,6 +262,67 @@
     tr.row-skipped td { opacity: 0.4; }
     tr.row-skipped .skip-btn,
     tr.row-skipped .check-cell { opacity: 1; }
+    /* CELEBRATION OVERLAY */
+    #celebration-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+      background: rgba(15,23,42,0.7);
+      backdrop-filter: blur(4px);
+    }
+    #confetti-canvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      width: 100%;
+      height: 100%;
+    }
+    .cel-card {
+      background: white;
+      border-radius: 24px;
+      padding: 2.5rem 2.5rem 2rem;
+      text-align: center;
+      position: relative;
+      z-index: 2001;
+      box-shadow: 0 25px 80px rgba(0,0,0,0.4);
+      max-width: 380px;
+      width: 90vw;
+      animation: cel-pop 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes cel-pop {
+      0%   { transform: scale(0.4); opacity: 0; }
+      100% { transform: scale(1);   opacity: 1; }
+    }
+    .cel-emoji {
+      font-size: 4.5rem;
+      line-height: 1;
+      margin-bottom: 0.6rem;
+      display: block;
+      animation: cel-bounce 0.8s ease 0.3s both;
+    }
+    @keyframes cel-bounce {
+      0%,100% { transform: translateY(0);   }
+      40%     { transform: translateY(-14px); }
+      70%     { transform: translateY(-7px);  }
+    }
+    .cel-card h2 { font-size: 1.75rem; font-weight: 800; color: #1a202c; margin-bottom: 0.4rem; }
+    .cel-card p  { color: #4b5563; font-size: 0.95rem; line-height: 1.55; margin-bottom: 1.5rem; }
+    .cel-close-btn {
+      background: linear-gradient(135deg, #1a56db, #7c3aed);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 0.75rem 2.2rem;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(26,86,219,0.35);
+    }
+    .cel-close-btn:hover { opacity: 0.9; }
+
     .note-btn {
       display: none;
       background: none;
@@ -1791,6 +1852,16 @@
 
 </main>
 
+<div id="celebration-overlay">
+  <canvas id="confetti-canvas"></canvas>
+  <div class="cel-card">
+    <span id="cel-emoji" class="cel-emoji">🎊</span>
+    <h2 id="cel-title">Happy Retirement!</h2>
+    <p id="cel-msg">All tasks complete!</p>
+    <button class="cel-close-btn" id="cel-close">Cheers! 🥂</button>
+  </div>
+</div>
+
 <script>
   // ── Tab navigation ─────────────────────────────────────────────
   function showTab(name) {
@@ -1902,6 +1973,17 @@
     document.getElementById('jody-bar').style.width   = jPct + '%';
     document.getElementById('steve-pct').textContent  = sPct + '%';
     document.getElementById('jody-pct').textContent   = jPct + '%';
+    // Celebrations
+    if (sPct === 100 && jPct === 100) {
+      showCelebration('both', '🎊', 'Happy Retirement!',
+        'Steve & Jody have completed everything. Time to enjoy this well-deserved next chapter!');
+    } else if (sPct === 100) {
+      showCelebration('steve', '🎉', "Steve's All Done!",
+        'Steve has finished all his retirement tasks. Way to go, Steve!');
+    } else if (jPct === 100) {
+      showCelebration('jody', '🎉', "Jody's All Done!",
+        'Jody has finished all her retirement tasks. Nicely done, Jody!');
+    }
   }
 
   // ── Sync status ─────────────────────────────────────────────────
@@ -2378,6 +2460,66 @@
 
   // ── Inject form chips (must run after FORM_CHIPS_MAP is defined) ─
   initFormChips();
+
+  // ── Celebration ─────────────────────────────────────────────────
+  let _celebShown = {};
+  try { _celebShown = JSON.parse(localStorage.getItem('celebrations') || '{}'); } catch(e) {}
+
+  function _launchConfetti() {
+    const canvas = document.getElementById('confetti-canvas');
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const ctx = canvas.getContext('2d');
+    const colors = ['#f59e0b','#10b981','#3b82f6','#ef4444','#8b5cf6',
+                    '#f97316','#ec4899','#22d3ee','#a3e635','#facc15'];
+    const pcs = Array.from({length: 140}, () => ({
+      x:  Math.random() * canvas.width,
+      y:  Math.random() * -canvas.height * 0.5,
+      w:  Math.random() * 12 + 5,
+      h:  Math.random() * 6  + 4,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      rot: Math.random() * Math.PI * 2,
+      rv:  (Math.random() - 0.5) * 0.15,
+      vx:  (Math.random() - 0.5) * 2.5,
+      vy:  Math.random() * 4 + 2,
+    }));
+    const DURATION = 4500;
+    let start = null;
+    (function draw(ts) {
+      if (!start) start = ts;
+      const t = ts - start;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const fade = t > DURATION * 0.65 ? 1 - (t - DURATION * 0.65) / (DURATION * 0.35) : 1;
+      pcs.forEach(p => {
+        p.x += p.vx; p.y += p.vy; p.rot += p.rv;
+        if (p.y > canvas.height) { p.y = -15; p.x = Math.random() * canvas.width; }
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, fade);
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rot);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+        ctx.restore();
+      });
+      if (t < DURATION) requestAnimationFrame(draw);
+      else ctx.clearRect(0, 0, canvas.width, canvas.height);
+    })(performance.now());
+  }
+
+  function showCelebration(key, emoji, title, msg) {
+    if (_celebShown[key]) return;
+    _celebShown[key] = true;
+    localStorage.setItem('celebrations', JSON.stringify(_celebShown));
+    document.getElementById('cel-emoji').textContent = emoji;
+    document.getElementById('cel-title').textContent = title;
+    document.getElementById('cel-msg').textContent   = msg;
+    document.getElementById('celebration-overlay').style.display = 'flex';
+    _launchConfetti();
+  }
+
+  document.getElementById('cel-close').addEventListener('click', () => {
+    document.getElementById('celebration-overlay').style.display = 'none';
+  });
 
   // ── Init ────────────────────────────────────────────────────────
   loadFromGitHub();
