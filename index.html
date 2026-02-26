@@ -564,7 +564,6 @@
   <div style="display:flex;gap:0.6rem;margin-bottom:1.2rem;flex-wrap:wrap;">
     <button class="print-btn" onclick="window.print()" style="flex:1;min-width:140px;margin:0;">Print This Guide</button>
     <button id="btn-sync-settings" class="print-btn" style="flex:1;min-width:140px;margin:0;background:#0891b2;">⚙ Sync Settings</button>
-    <button id="btn-reset" class="print-btn" style="flex:1;min-width:140px;margin:0;background:#6b7280;">Reset All</button>
   </div>
 
   <!-- Sync settings panel -->
@@ -1998,9 +1997,6 @@
     cb.parentElement.appendChild(btn);
   });
 
-  // ── Inject form chips into linked checklist rows ─────────────────
-  initFormChips();
-
   // ── Add note buttons to each checklist row ──────────────────────
   document.querySelectorAll('tr').forEach(row => {
     const cbs = row.querySelectorAll('input[data-key]');
@@ -2116,20 +2112,6 @@
     saveToGitHub();
   });
 
-  // ── Reset button ────────────────────────────────────────────────
-  document.getElementById('btn-reset').addEventListener('click', () => {
-    if (!confirm('Reset ALL checkboxes for both Steve and Jody? This cannot be undone.')) return;
-    getAllCheckboxes().forEach(cb => {
-      cb.checked = false;
-      localStorage.removeItem('guide-' + cb.dataset.key);
-    });
-    applySkipped([]);
-    saveSkippedSet(new Set());
-    applyNotes({});
-    saveNotesMap({});
-    updateProgress();
-    scheduleSave();
-  });
 
   // ── Form chips — link checklist rows to their required forms ─────
   const FORM_LABELS = {
@@ -2392,6 +2374,9 @@
   }
 
   renderCalendar();
+
+  // ── Inject form chips (must run after FORM_CHIPS_MAP is defined) ─
+  initFormChips();
 
   // ── Init ────────────────────────────────────────────────────────
   loadFromGitHub();
