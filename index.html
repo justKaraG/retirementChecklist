@@ -403,6 +403,7 @@
   <div class="tab active" onclick="showTab('overview')">Overview</div>
   <div class="tab" onclick="showTab('medicare')">Medicare Checklist</div>
   <div class="tab" onclick="showTab('ss')">Social Security Checklist</div>
+  <div class="tab" onclick="showTab('forms')">Forms</div>
   <div class="tab" onclick="showTab('deadlines')">Deadlines & Penalties</div>
   <div class="tab" onclick="showTab('links')">All Links & Contacts</div>
 </div>
@@ -1237,6 +1238,299 @@
   <p style="text-align:center; font-size:0.75rem; color:#9ca3af; margin-top:1rem;">
     Sourced from Medicare.gov and SSA.gov — updated for 2026. Verify details with official sources or a SHIP counselor. Not legal or financial advice.
   </p>
+
+</div>
+
+<!-- ============================================================ -->
+<!-- FORMS TAB -->
+<!-- ============================================================ -->
+<div id="tab-forms" class="page-section">
+
+  <style>
+    .forms-table { width:100%; border-collapse:collapse; font-size:0.84rem; }
+    .forms-table thead tr { background:#1e3a8a; color:white; }
+    .forms-table thead th { padding:0.6rem 0.8rem; text-align:left; font-weight:600; white-space:nowrap; }
+    .forms-table thead th.center { text-align:center; }
+    .forms-table tbody tr { border-bottom:1px solid #f1f5f9; }
+    .forms-table tbody tr:last-child { border-bottom:none; }
+    .forms-table tbody tr:hover { background:#fafbff; }
+    .forms-table tbody tr.section-header-row td {
+      background:#f1f5f9; font-weight:700; color:#374151;
+      padding:0.45rem 0.8rem; font-size:0.8rem; letter-spacing:0.04em;
+      text-transform:uppercase; border-top:2px solid #e2e8f0;
+    }
+    .forms-table td { padding:0.6rem 0.8rem; vertical-align:top; }
+    .forms-table td.center { text-align:center; vertical-align:middle; }
+    .form-name { font-weight:700; color:#1e3a8a; }
+    .form-sub  { font-size:0.78rem; color:#64748b; margin-top:0.15rem; }
+    .form-link { display:inline-block; margin-top:0.25rem; font-size:0.78rem; color:#1a56db; text-decoration:none; }
+    .form-link:hover { text-decoration:underline; }
+    .tag { display:inline-block; border-radius:4px; padding:0.1rem 0.45rem; font-size:0.72rem; font-weight:700; white-space:nowrap; }
+    .tag.employer { background:#fef3c7; color:#92400e; }
+    .tag.phone    { background:#fce7f3; color:#9d174d; }
+    .tag.online   { background:#dcfce7; color:#166534; }
+    .tag.state    { background:#e0f2fe; color:#0c4a6e; }
+    .tag.auto     { background:#f3e8ff; color:#5b21b6; }
+    .when-cell    { font-size:0.81rem; color:#374151; min-width:130px; }
+    .when-cell .urgent { color:#b91c1c; font-weight:700; }
+  </style>
+
+  <div class="alert warn" style="margin-bottom:1rem;">
+    <strong>Only fill out what applies to your path.</strong>
+    <p>Not all forms apply to everyone — see the Steve/Jody columns. Forms marked N/A don't need to be touched. Employer documents are things you <em>request</em>, not forms you fill out yourself.</p>
+  </div>
+
+  <!-- MEDICARE FORMS -->
+  <div class="card" style="margin-bottom:1.2rem;">
+    <div class="card-header"><div class="card-icon blue">🏥</div><h2>Medicare Forms</h2></div>
+    <div style="overflow-x:auto;">
+    <table class="forms-table">
+      <thead>
+        <tr>
+          <th style="min-width:180px;">Form</th>
+          <th>What It Does</th>
+          <th class="center" style="width:64px; color:#93c5fd;">Steve</th>
+          <th class="center" style="width:64px; color:#f9a8d4;">Jody</th>
+          <th style="min-width:120px;">How to Get It</th>
+          <th style="min-width:140px;">When to Submit</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="section-header-row"><td colspan="6">Enrollment Applications</td></tr>
+
+        <tr>
+          <td>
+            <div class="form-name">CMS-40B</div>
+            <div class="form-sub">Application for Enrollment in Medicare Part B</div>
+            <a class="form-link" href="https://www.cms.gov/medicare/cms-forms/cms-forms/cms-forms-items/cms017339" target="_blank">↗ Download PDF (cms.gov)</a>
+          </td>
+          <td>Apply for Part B (Medical) coverage if you are NOT auto-enrolled and NOT applying online through SSA</td>
+          <td class="center"><input type="checkbox" class="steve-cb" data-key="f-40b-s"></td>
+          <td class="center"><input type="checkbox" class="jody-cb" data-key="f-40b-j"></td>
+          <td><span class="tag online">Online PDF</span><br>Or ask Social Security for a paper copy</td>
+          <td class="when-cell"><span class="urgent">During your 7-month Initial Enrollment Period</span><br>Or during Jan–Mar General Enrollment Period (late penalty applies)</td>
+        </tr>
+
+        <tr>
+          <td>
+            <div class="form-name">CMS-L564</div>
+            <div class="form-sub">Request for Employment Information</div>
+            <a class="form-link" href="https://www.cms.gov/medicare/cms-forms/cms-forms/cms-forms-items/cms009718" target="_blank">↗ Download PDF (cms.gov)</a>
+          </td>
+          <td>Used when enrolling in Part B under a Special Enrollment Period because of employer coverage. <strong>You fill Section A; your employer fills Section B.</strong></td>
+          <td class="center"><input type="checkbox" class="steve-cb" data-key="f-l564-s"></td>
+          <td class="center"><input type="checkbox" class="jody-cb" data-key="f-l564-j"></td>
+          <td><span class="tag online">Online PDF</span> + <span class="tag employer">Employer fills Section B</span><br>Fax to 1-833-914-2016 or mail to local SSA office along with CMS-40B</td>
+          <td class="when-cell"><span class="urgent">Within 8 months</span> of losing employer coverage<br><em>(Only needed if you delayed Medicare because of employer health plan)</em></td>
+        </tr>
+
+        <tr class="section-header-row"><td colspan="6">Drug & Supplement Coverage</td></tr>
+
+        <tr>
+          <td>
+            <div class="form-name">Part D Enrollment Form</div>
+            <div class="form-sub">Prescription drug plan application</div>
+            <a class="form-link" href="https://www.medicare.gov/plan-compare" target="_blank">↗ Enroll at medicare.gov/plan-compare</a>
+          </td>
+          <td>Each drug plan has its own enrollment form. Easiest to complete online. Each person picks their own plan — they don't have to be the same.</td>
+          <td class="center"><input type="checkbox" class="steve-cb" data-key="f-partd-s"></td>
+          <td class="center"><input type="checkbox" class="jody-cb" data-key="f-partd-j"></td>
+          <td><span class="tag online">Online</span> via plan's website or medicare.gov/plan-compare<br>Or call the plan directly</td>
+          <td class="when-cell"><span class="urgent">During your 7-month IEP</span>, or within 63 days of losing other creditable drug coverage — do not wait</td>
+        </tr>
+
+        <tr>
+          <td>
+            <div class="form-name">Medigap Application</div>
+            <div class="form-sub">Medicare Supplement Insurance</div>
+            <a class="form-link" href="https://www.medicare.gov/health-drug-plans/medigap" target="_blank">↗ Find plans at medicare.gov</a>
+          </td>
+          <td>Each insurer has its own application. During your open enrollment window, insurers <em>must</em> accept you at standard rates regardless of health history.</td>
+          <td class="center"><input type="checkbox" class="steve-cb" data-key="f-medigap-s"></td>
+          <td class="center"><input type="checkbox" class="jody-cb" data-key="f-medigap-j"></td>
+          <td><span class="tag online">Online or by phone</span> directly with the insurer you choose</td>
+          <td class="when-cell"><span class="urgent">Within 6 months</span> of being 65+ AND enrolled in Part B — guaranteed acceptance window. After this, insurers can deny you.</td>
+        </tr>
+
+        <tr>
+          <td>
+            <div class="form-name">Medicare Advantage Enrollment</div>
+            <div class="form-sub">Part C — if choosing Advantage over Original Medicare</div>
+            <a class="form-link" href="https://www.medicare.gov/plan-compare" target="_blank">↗ Compare at medicare.gov/plan-compare</a>
+          </td>
+          <td>Replaces Original Medicare with a private plan that bundles A + B + usually D. Each plan has its own enrollment form.</td>
+          <td class="center"><input type="checkbox" class="steve-cb" data-key="f-ma-s"></td>
+          <td class="center"><input type="checkbox" class="jody-cb" data-key="f-ma-j"></td>
+          <td><span class="tag online">Online</span> via plan's website or medicare.gov/plan-compare<br>Cannot have Medigap and Medicare Advantage at the same time</td>
+          <td class="when-cell">During your 7-month IEP, or Annual Enrollment (Oct 15 – Dec 7)</td>
+        </tr>
+
+        <tr class="section-header-row"><td colspan="6">Financial Assistance</td></tr>
+
+        <tr>
+          <td>
+            <div class="form-name">Medicare Savings Program Application</div>
+            <div class="form-sub">State-specific form — varies by state</div>
+          </td>
+          <td>Helps pay Part A/B premiums, deductibles, and copays if income/assets are within limits. Applied through your state Medicaid office.</td>
+          <td class="center"><input type="checkbox" class="steve-cb" data-key="f-msp-s"></td>
+          <td class="center"><input type="checkbox" class="jody-cb" data-key="f-msp-j"></td>
+          <td><span class="tag state">State Medicaid office</span><br>Find your state's office at <a href="https://www.medicare.gov/basics/costs/help/medicare-savings-programs" target="_blank" style="color:#1a56db;">medicare.gov</a></td>
+          <td class="when-cell">Any time — apply as soon as eligible</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <!-- SOCIAL SECURITY FORMS -->
+  <div class="card" style="margin-bottom:1.2rem;">
+    <div class="card-header"><div class="card-icon pink">💵</div><h2>Social Security Forms</h2></div>
+    <div style="overflow-x:auto;">
+    <table class="forms-table">
+      <thead>
+        <tr>
+          <th style="min-width:180px;">Form</th>
+          <th>What It Does</th>
+          <th class="center" style="width:64px; color:#93c5fd;">Steve</th>
+          <th class="center" style="width:64px; color:#f9a8d4;">Jody</th>
+          <th style="min-width:120px;">How to Get It</th>
+          <th style="min-width:140px;">When to Submit</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="section-header-row"><td colspan="6">Retirement Benefits</td></tr>
+
+        <tr>
+          <td>
+            <div class="form-name">Online Retirement Application</div>
+            <div class="form-sub">SSA iClaim — Steve's retirement benefit</div>
+            <a class="form-link" href="https://www.ssa.gov/retirement/applyonline.htm" target="_blank">↗ Apply at ssa.gov</a>
+          </td>
+          <td>Apply for Steve's own Social Security retirement benefit. Completed entirely online. Must be at least 61 years and 9 months old to apply.</td>
+          <td class="center"><input type="checkbox" class="steve-cb" data-key="f-ssret-s"></td>
+          <td class="center"><div class="na-pill">N/A</div></td>
+          <td><span class="tag online">Online only</span> at ssa.gov/retirement/applyonline.htm</td>
+          <td class="when-cell">Apply <span class="urgent">up to 4 months before</span> the month you want benefits to start. First payment arrives the month <em>after</em> your chosen start month.</td>
+        </tr>
+
+        <tr>
+          <td>
+            <div class="form-name">SSA-2</div>
+            <div class="form-sub">Application for Spouse's Insurance Benefits — Jody's benefit</div>
+            <a class="form-link" href="https://www.ssa.gov/forms/ssa-2.html" target="_blank">↗ View form at ssa.gov</a>
+          </td>
+          <td>Jody's application for spousal Social Security benefits — up to 50% of Steve's full retirement amount. <strong>Must be done by phone (1-800-772-1213) or in-person at an SSA office — not online.</strong></td>
+          <td class="center"><div class="na-pill">N/A</div></td>
+          <td class="center"><input type="checkbox" class="jody-cb" data-key="f-ssa2-j"></td>
+          <td><span class="tag phone">Phone or in-person</span><br>Call 1-800-772-1213 or visit <a href="https://www.ssa.gov/locator" target="_blank" style="color:#1a56db;">local SSA office</a><br><br>Bring: marriage certificate, Steve's SSN, Jody's birth certificate</td>
+          <td class="when-cell"><span class="urgent">After Steve has filed</span> for his own benefits — Jody cannot apply until Steve's claim is active</td>
+        </tr>
+
+        <tr class="section-header-row"><td colspan="6">Premium & Cost Adjustments</td></tr>
+
+        <tr>
+          <td>
+            <div class="form-name">SSA-44</div>
+            <div class="form-sub">Medicare Income-Related Monthly Adjustment Amount (IRMAA) — Life-Changing Event</div>
+            <a class="form-link" href="https://www.ssa.gov/forms/ssa-44.pdf" target="_blank">↗ Download PDF (ssa.gov)</a>
+          </td>
+          <td>If Medicare is charging a higher Part B premium based on your income from 2 years ago, but your income has since dropped significantly (e.g. due to retirement), use this form to appeal and get the premium reduced.</td>
+          <td class="center"><input type="checkbox" class="steve-cb" data-key="f-ssa44-s"></td>
+          <td class="center"><input type="checkbox" class="jody-cb" data-key="f-ssa44-j"></td>
+          <td><span class="tag online">PDF download</span><br>Mail or bring to your local SSA office</td>
+          <td class="when-cell">When you receive a Medicare bill showing an IRMAA surcharge that no longer reflects your current income</td>
+        </tr>
+
+        <tr class="section-header-row"><td colspan="6">Financial Assistance</td></tr>
+
+        <tr>
+          <td>
+            <div class="form-name">SSA-1020</div>
+            <div class="form-sub">Application for Extra Help with Medicare Prescription Drug Plan Costs</div>
+            <a class="form-link" href="https://www.ssa.gov/forms/ssa-1020.html" target="_blank">↗ Apply at ssa.gov</a>
+          </td>
+          <td>If income and resources are limited, this reduces monthly Part D premiums, deductibles, and copays. Both apply separately.</td>
+          <td class="center"><input type="checkbox" class="steve-cb" data-key="f-1020-s"></td>
+          <td class="center"><input type="checkbox" class="jody-cb" data-key="f-1020-j"></td>
+          <td><span class="tag online">Online</span> at ssa.gov/forms/ssa-1020.html<br>Or call 1-800-772-1213</td>
+          <td class="when-cell">Any time — apply as soon as eligible. Auto-enrolled if already on Medicaid or Medicare Savings Programs.</td>
+        </tr>
+
+        <tr class="section-header-row"><td colspan="6">Account Setup</td></tr>
+
+        <tr>
+          <td>
+            <div class="form-name">Direct Deposit Setup</div>
+            <div class="form-sub">SSA-1199 / done online via my Social Security</div>
+            <a class="form-link" href="https://www.ssa.gov/myaccount" target="_blank">↗ Set up at ssa.gov/myaccount</a>
+          </td>
+          <td>Set up bank account to receive SS payments. SSA no longer mails checks by default — direct deposit is required. Have bank routing number and account number ready.</td>
+          <td class="center"><input type="checkbox" class="steve-cb" data-key="f-dd-s"></td>
+          <td class="center"><input type="checkbox" class="jody-cb" data-key="f-dd-j"></td>
+          <td><span class="tag online">Online</span> via my Social Security account<br>Or <span class="tag phone">by phone</span> when applying</td>
+          <td class="when-cell">During or immediately after SS application — required before first payment</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <!-- EMPLOYER DOCUMENTS -->
+  <div class="card" style="margin-bottom:1.2rem;">
+    <div class="card-header"><div class="card-icon amber">🏢</div><h2>Documents to Request from Employer <span style="font-size:0.8rem;font-weight:400;color:#64748b;">(not forms you fill — things HR gives you)</span></h2></div>
+    <div style="overflow-x:auto;">
+    <table class="forms-table">
+      <thead>
+        <tr>
+          <th style="min-width:180px;">Document</th>
+          <th>What It's For</th>
+          <th class="center" style="width:64px; color:#93c5fd;">Steve</th>
+          <th class="center" style="width:64px; color:#f9a8d4;">Jody</th>
+          <th style="min-width:120px;">Where to Get It</th>
+          <th style="min-width:140px;">When You Need It</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <div class="form-name">Creditable Coverage Letter</div>
+            <div class="form-sub">Written confirmation from employer that health plan is "creditable"</div>
+          </td>
+          <td>Proves your current employer health coverage is at least as good as Medicare. Required to delay Medicare enrollment without penalty and to use the Special Enrollment Period when that coverage ends.</td>
+          <td class="center"><input type="checkbox" class="steve-cb" data-key="f-cred-s"></td>
+          <td class="center"><input type="checkbox" class="jody-cb" data-key="f-cred-j"></td>
+          <td><span class="tag employer">Request from HR</span><br>Ask specifically for a letter confirming Part D creditable coverage</td>
+          <td class="when-cell"><span class="urgent">Before ending employer coverage</span> — get this in writing. Also needed when applying for Medicare under the Special Enrollment Period.</td>
+        </tr>
+
+        <tr>
+          <td>
+            <div class="form-name">Summary Plan Description (SPD)</div>
+            <div class="form-sub">Full details of the employer health plan</div>
+          </td>
+          <td>Details exactly what the employer plan covers. Helps verify it's creditable for Medicare purposes and understand what you're losing when coverage ends.</td>
+          <td class="center"><input type="checkbox" class="steve-cb" data-key="f-spd-s"></td>
+          <td class="center"><input type="checkbox" class="jody-cb" data-key="f-spd-j"></td>
+          <td><span class="tag employer">Request from HR</span><br>Employers are legally required to provide this upon request</td>
+          <td class="when-cell">Before deciding whether to delay Medicare — review this alongside the creditable coverage letter</td>
+        </tr>
+
+        <tr>
+          <td>
+            <div class="form-name">COBRA Election Notice</div>
+            <div class="form-sub">Option to continue employer coverage after leaving</div>
+          </td>
+          <td>Employer must send this within 14 days of coverage ending. <strong>Important:</strong> COBRA is generally NOT creditable for Part D — enrolling in COBRA alone does not protect you from the Part D late penalty.</td>
+          <td class="center"><input type="checkbox" class="steve-cb" data-key="f-cobra-s"></td>
+          <td class="center"><input type="checkbox" class="jody-cb" data-key="f-cobra-j"></td>
+          <td><span class="tag auto">Sent automatically</span> by employer after coverage ends</td>
+          <td class="when-cell">Arrives within 14 days of leaving employer coverage — you have 60 days to elect COBRA if desired. Do not rely on COBRA for Part D creditable coverage.</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
 
 </div>
 
