@@ -421,6 +421,23 @@
     .must-jody  { font-size: 0.72rem; background: #f5f3ff; color: #5b21b6; border-radius: 4px; padding: 0.1rem 0.4rem; font-weight: 700; }
     .must-both  { font-size: 0.72rem; background: #dcfce7; color: #166534; border-radius: 4px; padding: 0.1rem 0.4rem; font-weight: 700; }
 
+    /* DECISION INPUTS */
+    .dec-input {
+      width: 100%;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 0.35rem 0.55rem;
+      font-size: 0.84rem;
+      color: #1a202c;
+      font-family: inherit;
+      background: #f8fafc;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .dec-input:focus { outline: none; border-color: #3b82f6; background: white; }
+    .dec-input::placeholder { color: #94a3b8; font-style: italic; }
+    .dec-input.jody-dec:focus { border-color: #7c3aed; }
+    td.dec-cell { padding: 0.45rem 0.6rem; vertical-align: middle; min-width: 175px; }
+
     /* PART SUMMARY CARDS */
     .part-grid {
       display: grid;
@@ -610,6 +627,7 @@
   <div class="tab" onclick="showTab('medicare')">Medicare Checklist</div>
   <div class="tab" onclick="showTab('ss')">Social Security Checklist</div>
   <div class="tab" onclick="showTab('forms')">Forms</div>
+  <div class="tab" onclick="showTab('decisions')">📋 Our Decisions</div>
   <div class="tab" onclick="showTab('deadlines')">Deadlines & Penalties</div>
   <div class="tab" onclick="showTab('links')">All Links & Contacts</div>
   <div class="tab" onclick="showTab('calendar')">📅 Calendar</div>
@@ -1341,6 +1359,99 @@
 </div>
 
 <!-- ============================================================ -->
+<!-- OUR DECISIONS TAB -->
+<!-- ============================================================ -->
+<div id="tab-decisions" class="page-section">
+
+  <div class="card">
+    <div class="card-header"><div class="card-icon green">📋</div><h2>Our Decisions</h2></div>
+    <p style="padding:0.2rem 1.2rem 0.9rem; font-size:0.85rem; color:#4b5563;">Record your key choices here for quick reference. Click any field and start typing — changes save automatically.</p>
+    <div style="overflow-x:auto;">
+    <table class="task-table">
+      <thead><tr>
+        <th style="min-width:190px;">Decision</th>
+        <th class="steve-col" style="min-width:180px;">Steve</th>
+        <th class="jody-col" style="min-width:180px;">Jody</th>
+      </tr></thead>
+      <tbody>
+
+        <tr class="section-header-row"><td colspan="3">Medicare Coverage</td></tr>
+        <tr>
+          <td class="task-cell"><div class="task-desc">Coverage path chosen</div><div class="task-note">Original Medicare + Medigap + Part D, or Medicare Advantage</div></td>
+          <td class="dec-cell"><input class="dec-input" data-dec="path-s" placeholder="e.g. Original + Medigap"></td>
+          <td class="dec-cell"><input class="dec-input jody-dec" data-dec="path-j" placeholder="e.g. Medicare Advantage"></td>
+        </tr>
+        <tr>
+          <td class="task-cell"><div class="task-desc">Part D drug plan</div><div class="task-note">Plan name &amp; insurance company</div></td>
+          <td class="dec-cell"><input class="dec-input" data-dec="partd-s" placeholder="e.g. Humana Walmart Rx"></td>
+          <td class="dec-cell"><input class="dec-input jody-dec" data-dec="partd-j" placeholder="e.g. SilverScript"></td>
+        </tr>
+        <tr>
+          <td class="task-cell"><div class="task-desc">Part D monthly cost</div></td>
+          <td class="dec-cell"><input class="dec-input" data-dec="partd-cost-s" placeholder="e.g. $18.50/mo"></td>
+          <td class="dec-cell"><input class="dec-input jody-dec" data-dec="partd-cost-j" placeholder="e.g. $18.50/mo"></td>
+        </tr>
+        <tr>
+          <td class="task-cell"><div class="task-desc">Medigap plan</div><div class="task-note">Plan letter &amp; insurer — only if using Original Medicare</div></td>
+          <td class="dec-cell"><input class="dec-input" data-dec="medigap-s" placeholder="e.g. Plan G — AARP/UHC"></td>
+          <td class="dec-cell"><input class="dec-input jody-dec" data-dec="medigap-j" placeholder="e.g. Plan G — AARP/UHC"></td>
+        </tr>
+        <tr>
+          <td class="task-cell"><div class="task-desc">Medigap monthly premium</div></td>
+          <td class="dec-cell"><input class="dec-input" data-dec="medigap-cost-s" placeholder="e.g. $145/mo"></td>
+          <td class="dec-cell"><input class="dec-input jody-dec" data-dec="medigap-cost-j" placeholder="e.g. $145/mo"></td>
+        </tr>
+        <tr>
+          <td class="task-cell"><div class="task-desc">Medicare Advantage plan</div><div class="task-note">Plan name &amp; insurer — only if choosing Advantage over Original</div></td>
+          <td class="dec-cell"><input class="dec-input" data-dec="ma-s" placeholder="e.g. Aetna Medicare Elite"></td>
+          <td class="dec-cell"><input class="dec-input jody-dec" data-dec="ma-j" placeholder="e.g. Aetna Medicare Elite"></td>
+        </tr>
+        <tr>
+          <td class="task-cell"><div class="task-desc">Monthly Part B premium</div><div class="task-note">Standard is $185/mo in 2026; may be higher with IRMAA surcharge</div></td>
+          <td class="dec-cell"><input class="dec-input" data-dec="partb-s" placeholder="e.g. $185/mo"></td>
+          <td class="dec-cell"><input class="dec-input jody-dec" data-dec="partb-j" placeholder="e.g. $185/mo"></td>
+        </tr>
+        <tr>
+          <td class="task-cell"><div class="task-desc">Primary doctor accepts Medicare?</div><div class="task-note">Doctor name, confirmed yes/no</div></td>
+          <td class="dec-cell"><input class="dec-input" data-dec="doctor-s" placeholder="e.g. Dr. Smith — confirmed ✓"></td>
+          <td class="dec-cell"><input class="dec-input jody-dec" data-dec="doctor-j" placeholder="e.g. Dr. Jones — confirmed ✓"></td>
+        </tr>
+
+        <tr class="section-header-row"><td colspan="3">Social Security</td></tr>
+        <tr>
+          <td class="task-cell"><div class="task-desc">Benefits start date</div></td>
+          <td class="dec-cell"><input class="dec-input" data-dec="ss-start-s" placeholder="e.g. November 2026"></td>
+          <td class="dec-cell"><input class="dec-input jody-dec" data-dec="ss-start-j" placeholder="e.g. After SSA interview"></td>
+        </tr>
+        <tr>
+          <td class="task-cell"><div class="task-desc">Expected monthly benefit</div></td>
+          <td class="dec-cell"><input class="dec-input" data-dec="ss-amt-s" placeholder="e.g. $2,450/mo"></td>
+          <td class="dec-cell"><input class="dec-input jody-dec" data-dec="ss-amt-j" placeholder="e.g. ~50% of Steve's"></td>
+        </tr>
+        <tr>
+          <td class="task-cell"><div class="task-desc">Filing strategy / notes</div><div class="task-note">e.g. timing, coordination between Steve &amp; Jody</div></td>
+          <td class="dec-cell" colspan="2"><input class="dec-input" data-dec="ss-strategy" placeholder="e.g. Steve files Nov 2026, Jody files for spousal after SSA interview"></td>
+        </tr>
+
+        <tr class="section-header-row"><td colspan="3">Financial</td></tr>
+        <tr>
+          <td class="task-cell"><div class="task-desc">Bank for SS direct deposit</div></td>
+          <td class="dec-cell"><input class="dec-input" data-dec="bank-s" placeholder="e.g. Chase — checking"></td>
+          <td class="dec-cell"><input class="dec-input jody-dec" data-dec="bank-j" placeholder="e.g. Chase — checking"></td>
+        </tr>
+        <tr>
+          <td class="task-cell"><div class="task-desc">IRMAA appeal filed?</div><div class="task-note">SSA-44 — if income dropped due to retirement</div></td>
+          <td class="dec-cell"><input class="dec-input" data-dec="irmaa-s" placeholder="e.g. Filed March 2026, reduced to standard"></td>
+          <td class="dec-cell"><input class="dec-input jody-dec" data-dec="irmaa-j" placeholder="e.g. Not applicable"></td>
+        </tr>
+
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+</div>
+
 <!-- DEADLINES & PENALTIES TAB -->
 <!-- ============================================================ -->
 <div id="tab-deadlines" class="page-section">
@@ -2003,6 +2114,7 @@
         applyState(data.checked || []);
         applySkipped(data.skipped || []);
         applyNotes(data.notes || {});
+        applyDecisions(data.decisions || {});
         updateProgress();
         try { updateFormChips(); } catch(e) {}
         const when = data.lastUpdated ? new Date(data.lastUpdated).toLocaleString() : 'unknown';
@@ -2015,6 +2127,7 @@
       if (localStorage.getItem('guide-' + cb.dataset.key) === 'true') cb.checked = true;
     });
     applyNotes(getNotesMap());
+    applyDecisions(getDecisionsMap());
     updateProgress();
     try { updateFormChips(); } catch(e) {}
     setSyncStatus(GH.pat ? 'No saved state yet — check something to create it' : '⚠ Add a GitHub token in ⚙ Sync Settings to share progress across devices', '#f59e0b');
@@ -2034,6 +2147,7 @@
       checked:     getAllCheckboxes().filter(c => c.checked).map(c => c.dataset.key),
       skipped:     [...getSkippedSet()],
       notes:       getNotesMap(),
+      decisions:   getDecisionsMap(),
       lastUpdated: new Date().toISOString()
     };
     const content = btoa(unescape(encodeURIComponent(JSON.stringify(state, null, 2))));
@@ -2460,6 +2574,32 @@
 
   // ── Inject form chips (must run after FORM_CHIPS_MAP is defined) ─
   initFormChips();
+
+  // ── Decisions ───────────────────────────────────────────────────
+  function getDecisionsMap() {
+    try { return JSON.parse(localStorage.getItem('decisions-map') || '{}'); }
+    catch(e) { return {}; }
+  }
+  function saveDecisionsMap(map) {
+    localStorage.setItem('decisions-map', JSON.stringify(map));
+  }
+  function applyDecisions(decisions) {
+    const map = (decisions && typeof decisions === 'object') ? decisions : {};
+    saveDecisionsMap(map);
+    document.querySelectorAll('.dec-input[data-dec]').forEach(input => {
+      input.value = map[input.dataset.dec] || '';
+    });
+  }
+
+  document.querySelectorAll('.dec-input[data-dec]').forEach(input => {
+    input.addEventListener('input', () => {
+      const map = getDecisionsMap();
+      if (input.value.trim()) map[input.dataset.dec] = input.value;
+      else delete map[input.dataset.dec];
+      saveDecisionsMap(map);
+      scheduleSave();
+    });
+  });
 
   // ── Celebration ─────────────────────────────────────────────────
   let _celebShown = {};
