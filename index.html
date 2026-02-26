@@ -40,7 +40,7 @@
     }
     .dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
     .dot.steve { background: #60a5fa; }
-    .dot.jody  { background: #f9a8d4; }
+    .dot.jody  { background: #a78bfa; }
     .dot.both  { background: #86efac; }
     .dot.na    { background: #94a3b8; }
 
@@ -97,7 +97,7 @@
     .progress-track { height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; }
     .progress-fill { height: 100%; border-radius: 4px; transition: width 0.3s ease; }
     .progress-fill.steve { background: #3b82f6; }
-    .progress-fill.jody  { background: #ec4899; }
+    .progress-fill.jody  { background: #7c3aed; }
 
     /* ALERT BOX */
     .alert {
@@ -115,9 +115,9 @@
     .alert.info { background: #eff6ff; border-left: 4px solid #3b82f6; }
     .alert.info strong { color: #1e40af; }
     .alert.info p { color: #1e3a8a; margin-top: 0.2rem; }
-    .alert.jody-note { background: #fdf2f8; border-left: 4px solid #ec4899; }
-    .alert.jody-note strong { color: #9d174d; }
-    .alert.jody-note p { color: #831843; margin-top: 0.2rem; }
+    .alert.jody-note { background: #faf5ff; border-left: 4px solid #7c3aed; }
+    .alert.jody-note strong { color: #5b21b6; }
+    .alert.jody-note p { color: #4c1d95; margin-top: 0.2rem; }
 
     /* SECTION CARD */
     .card {
@@ -161,7 +161,7 @@
     }
     .task-table thead th:first-child { text-align: left; }
     .task-table thead th.steve-col { color: #1d4ed8; }
-    .task-table thead th.jody-col  { color: #be185d; }
+    .task-table thead th.jody-col  { color: #5b21b6; }
 
     .task-table tbody tr {
       border-bottom: 1px solid #f1f5f9;
@@ -183,7 +183,7 @@
       margin-top: 0.2rem;
       line-height: 1.35;
     }
-    .task-note.jody { color: #be185d; }
+    .task-note.jody { color: #5b21b6; }
     .task-note.warn { color: #b45309; font-weight: 600; }
 
     .check-cell {
@@ -198,7 +198,7 @@
       border-radius: 4px;
     }
     .check-cell input.steve-cb { accent-color: #2563eb; }
-    .check-cell input.jody-cb  { accent-color: #db2777; }
+    .check-cell input.jody-cb  { accent-color: #7c3aed; }
 
     .na-pill {
       display: inline-block;
@@ -333,7 +333,7 @@
       font-weight: 600;
     }
     .must-steve { font-size: 0.72rem; background: #dbeafe; color: #1e40af; border-radius: 4px; padding: 0.1rem 0.4rem; font-weight: 700; }
-    .must-jody  { font-size: 0.72rem; background: #fce7f3; color: #9d174d; border-radius: 4px; padding: 0.1rem 0.4rem; font-weight: 700; }
+    .must-jody  { font-size: 0.72rem; background: #f5f3ff; color: #5b21b6; border-radius: 4px; padding: 0.1rem 0.4rem; font-weight: 700; }
     .must-both  { font-size: 0.72rem; background: #dcfce7; color: #166534; border-radius: 4px; padding: 0.1rem 0.4rem; font-weight: 700; }
 
     /* PART SUMMARY CARDS */
@@ -456,10 +456,10 @@
       border: 2px solid #e2e8f0;
     }
     .ss-card.steve-card { border-color: #93c5fd; background: #eff6ff; }
-    .ss-card.jody-card  { border-color: #f9a8d4; background: #fdf2f8; }
+    .ss-card.jody-card  { border-color: #a78bfa; background: #faf5ff; }
     .ss-card h3 { font-size: 0.95rem; margin-bottom: 0.6rem; }
     .ss-card.steve-card h3 { color: #1d4ed8; }
-    .ss-card.jody-card h3  { color: #be185d; }
+    .ss-card.jody-card h3  { color: #5b21b6; }
     .ss-card ul { list-style: none; }
     .ss-card ul li { font-size: 0.82rem; color: #374151; padding: 0.2rem 0; display: flex; gap: 0.4rem; }
     .ss-card ul li::before { content: "•"; color: #94a3b8; flex-shrink: 0; }
@@ -2134,7 +2134,7 @@
       id: 'jody-ssa',
       label: "Jody's SSA Interview",
       note: 'Bring marriage cert, SS cards, birth certs. April 23, 2026.',
-      bg: '#fce7f3', text: '#9d174d', border: '#ec4899',
+      bg: '#faf5ff', text: '#5b21b6', border: '#7c3aed',
       ranges: [['2026-04-23','2026-04-23']], dot: true
     },
     {
