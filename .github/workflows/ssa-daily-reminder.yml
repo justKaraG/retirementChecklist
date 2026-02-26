@@ -1,0 +1,49 @@
+name: SSA Daily 10am Reminder
+
+# Texts Jody every weekday at 10am Eastern with a direct link to check appointments.
+# Disable when she gets an earlier appointment or April 23 passes:
+#   Actions tab → this workflow → ⋯ → Disable workflow
+
+on:
+  schedule:
+    - cron: '0 15 * * 1-5'   # 10am EST (15:00 UTC) / 11am EDT — Mon–Fri
+  workflow_dispatch:           # lets you send a test text manually from Actions tab
+
+jobs:
+  remind:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+
+    steps:
+      - name: Text Jody
+        env:
+          GMAIL_FROM:     ${{ secrets.GMAIL_FROM }}
+          GMAIL_APP_PASS: ${{ secrets.GMAIL_APP_PASS }}
+          PHONE_NUMBER:   ${{ secrets.PHONE_NUMBER }}
+        run: |
+          python3 - <<'EOF'
+          import smtplib, os, sys
+          from email.mime.text import MIMEText
+
+          gmail    = os.environ.get("GMAIL_FROM", "")
+          password = os.environ.get("GMAIL_APP_PASS", "")
+          phone    = os.environ.get("PHONE_NUMBER", "")
+
+          if not all([gmail, password, phone]):
+              print("Missing secrets — skipping"); sys.exit(1)
+
+          body = (
+              "Daily reminder: check for earlier SSA appointments (before Apr 23)!\n\n"
+              "Tap to open the scheduler:\n"
+              "https://www.ssa.gov/manage-benefits/make-an-appointment"
+          )
+          msg = MIMEText(body)
+          msg["Subject"] = "SSA Appt Check"
+          msg["From"]    = gmail
+          msg["To"]      = phone + "@tmomail.net"
+
+          with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=15) as s:
+              s.login(gmail, password)
+              s.send_message(msg)
+          print(f"Reminder sent to {phone}@tmomail.net")
+          EOF
