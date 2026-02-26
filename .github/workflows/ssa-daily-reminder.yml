@@ -1,12 +1,12 @@
-name: SSA Daily 10am Reminder
+name: SSA Daily 8:30am Reminder
 
-# Texts Jody every weekday at 10am Eastern with a direct link to check appointments.
+# Texts Jody every weekday at 8:30am Eastern with a direct link to check appointments.
 # Disable when she gets an earlier appointment or April 23 passes:
 #   Actions tab → this workflow → ⋯ → Disable workflow
 
 on:
   schedule:
-    - cron: '0 15 * * 1-5'   # 10am EST (15:00 UTC) / 11am EDT — Mon–Fri
+    - cron: '30 12 * * 1-5'   # 8:30am EDT (12:30 UTC) — Mon–Fri
   workflow_dispatch:           # lets you send a test text manually from Actions tab
 
 jobs:
