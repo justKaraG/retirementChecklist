@@ -1887,7 +1887,6 @@
       cb.checked = set.has(cb.dataset.key);
       localStorage.setItem('guide-' + cb.dataset.key, cb.checked);
     });
-    updateFormChips();
   }
 
   // ── Progress bars (skipped items excluded from total) ───────────
@@ -1923,6 +1922,7 @@
         applySkipped(data.skipped || []);
         applyNotes(data.notes || {});
         updateProgress();
+        try { updateFormChips(); } catch(e) {}
         const when = data.lastUpdated ? new Date(data.lastUpdated).toLocaleString() : 'unknown';
         setSyncStatus('✓ Synced — last saved ' + when, '#16a34a');
         return true;
@@ -1934,6 +1934,7 @@
     });
     applyNotes(getNotesMap());
     updateProgress();
+    try { updateFormChips(); } catch(e) {}
     setSyncStatus(GH.pat ? 'No saved state yet — check something to create it' : '⚠ Add a GitHub token in ⚙ Sync Settings to share progress across devices', '#f59e0b');
     return false;
   }
