@@ -238,6 +238,38 @@
     tr.row-skipped td { opacity: 0.4; }
     tr.row-skipped .skip-btn,
     tr.row-skipped .check-cell { opacity: 1; }
+    .note-btn {
+      display: none;
+      background: none;
+      border: 1px solid #e2e8f0;
+      border-radius: 4px;
+      color: #cbd5e1;
+      cursor: pointer;
+      font-size: 0.72rem;
+      padding: 0.1rem 0.35rem;
+      margin-left: 0.3rem;
+      line-height: 1.6;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+    tr:hover .note-btn { display: inline-block; }
+    .note-btn:hover { background: #eff6ff; border-color: #93c5fd; color: #2563eb; }
+    .note-btn.has-note { display: inline-block; color: #2563eb; border-color: #93c5fd; background: #eff6ff; }
+    .note-input {
+      display: none;
+      width: 100%;
+      margin-top: 0.35rem;
+      font-size: 0.8rem;
+      border: 1px solid #dbeafe;
+      border-radius: 4px;
+      padding: 0.3rem 0.5rem;
+      resize: vertical;
+      min-height: 2.2rem;
+      color: #475569;
+      background: #f8fafc;
+      font-family: inherit;
+    }
+    .note-input.open { display: block; }
     .must-steve { font-size: 0.72rem; background: #dbeafe; color: #1e40af; border-radius: 4px; padding: 0.1rem 0.4rem; font-weight: 700; }
     .must-jody  { font-size: 0.72rem; background: #fce7f3; color: #9d174d; border-radius: 4px; padding: 0.1rem 0.4rem; font-weight: 700; }
     .must-both  { font-size: 0.72rem; background: #dcfce7; color: #166534; border-radius: 4px; padding: 0.1rem 0.4rem; font-weight: 700; }
@@ -1704,6 +1736,33 @@
     }
   }
 
+  // ── Notes state ─────────────────────────────────────────────────
+  function getNotesMap() {
+    try { return JSON.parse(localStorage.getItem('notes-map') || '{}'); }
+    catch(e) { return {}; }
+  }
+  function saveNotesMap(map) {
+    localStorage.setItem('notes-map', JSON.stringify(map));
+  }
+
+  function applyNotes(notes) {
+    const map = (notes && typeof notes === 'object') ? notes : {};
+    saveNotesMap(map);
+    document.querySelectorAll('.note-input').forEach(input => {
+      const key  = input.dataset.noteKey;
+      const text = map[key] || '';
+      input.value = text;
+      const btn = document.querySelector(`.note-btn[data-note-key="${key}"]`);
+      if (text) {
+        if (btn) btn.classList.add('has-note');
+        input.classList.add('open');
+      } else {
+        if (btn) btn.classList.remove('has-note');
+        input.classList.remove('open');
+      }
+    });
+  }
+
   function applySkipped(keys) {
     const set = new Set(keys);
     document.querySelectorAll('.skip-btn').forEach(btn => {
@@ -1751,6 +1810,7 @@
         const data = await res.json();
         applyState(data.checked || []);
         applySkipped(data.skipped || []);
+        applyNotes(data.notes || {});
         updateProgress();
         const when = data.lastUpdated ? new Date(data.lastUpdated).toLocaleString() : 'unknown';
         setSyncStatus('✓ Synced — last saved ' + when, '#16a34a');
@@ -1761,6 +1821,7 @@
     getAllCheckboxes().forEach(cb => {
       if (localStorage.getItem('guide-' + cb.dataset.key) === 'true') cb.checked = true;
     });
+    applyNotes(getNotesMap());
     updateProgress();
     setSyncStatus(GH.pat ? 'No saved state yet — check something to create it' : '⚠ Add a GitHub token in ⚙ Sync Settings to share progress across devices', '#f59e0b');
     return false;
@@ -1778,6 +1839,7 @@
     const state = {
       checked:     getAllCheckboxes().filter(c => c.checked).map(c => c.dataset.key),
       skipped:     [...getSkippedSet()],
+      notes:       getNotesMap(),
       lastUpdated: new Date().toISOString()
     };
     const content = btoa(unescape(encodeURIComponent(JSON.stringify(state, null, 2))));
@@ -1822,6 +1884,59 @@
     btn.textContent = '✗ skip';
     btn.title = 'Mark as not going to do';
     cb.parentElement.appendChild(btn);
+  });
+
+  // ── Add note buttons to each checklist row ──────────────────────
+  document.querySelectorAll('tr').forEach(row => {
+    const cbs = row.querySelectorAll('input[data-key]');
+    if (!cbs.length) return;
+    const baseKey = cbs[0].dataset.key.replace(/-[sj]$/, '');
+    const firstTd = row.querySelector('td');
+    if (!firstTd) return;
+
+    const noteBtn = document.createElement('button');
+    noteBtn.className = 'note-btn';
+    noteBtn.dataset.noteKey = baseKey;
+    noteBtn.textContent = '✎ note';
+    noteBtn.title = 'Add a preparation note';
+    firstTd.appendChild(noteBtn);
+
+    const noteInput = document.createElement('textarea');
+    noteInput.className = 'note-input';
+    noteInput.dataset.noteKey = baseKey;
+    noteInput.placeholder = 'e.g. "Go print X", "Call SSA first", "Steve to handle"…';
+    noteInput.rows = 2;
+    firstTd.appendChild(noteInput);
+  });
+
+  // ── Toggle note panel on button click ───────────────────────────
+  document.addEventListener('click', e => {
+    const btn = e.target.closest('.note-btn');
+    if (!btn) return;
+    const key   = btn.dataset.noteKey;
+    const input = document.querySelector(`.note-input[data-note-key="${key}"]`);
+    if (!input) return;
+    const wasOpen = input.classList.contains('open');
+    input.classList.toggle('open', !wasOpen);
+    if (!wasOpen) input.focus();
+  });
+
+  // ── Save notes on input ─────────────────────────────────────────
+  document.addEventListener('input', e => {
+    const input = e.target.closest('.note-input');
+    if (!input) return;
+    const key   = input.dataset.noteKey;
+    const notes = getNotesMap();
+    const btn   = document.querySelector(`.note-btn[data-note-key="${key}"]`);
+    if (input.value.trim()) {
+      notes[key] = input.value;
+      if (btn) btn.classList.add('has-note');
+    } else {
+      delete notes[key];
+      if (btn) btn.classList.remove('has-note');
+    }
+    saveNotesMap(notes);
+    scheduleSave();
   });
 
   // ── Wire up checkboxes ──────────────────────────────────────────
@@ -1889,6 +2004,8 @@
     });
     applySkipped([]);
     saveSkippedSet(new Set());
+    applyNotes({});
+    saveNotesMap({});
     updateProgress();
     scheduleSave();
   });
