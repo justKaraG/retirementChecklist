@@ -416,8 +416,29 @@
 
   <div style="display:flex;gap:0.6rem;margin-bottom:1.2rem;flex-wrap:wrap;">
     <button class="print-btn" onclick="window.print()" style="flex:1;min-width:140px;margin:0;">Print This Guide</button>
-    <button id="btn-share" class="print-btn" style="flex:1;min-width:140px;margin:0;background:#0891b2;">Share Progress Link</button>
+    <button id="btn-sync-settings" class="print-btn" style="flex:1;min-width:140px;margin:0;background:#0891b2;">⚙ Sync Settings</button>
     <button id="btn-reset" class="print-btn" style="flex:1;min-width:140px;margin:0;background:#6b7280;">Reset All</button>
+  </div>
+
+  <!-- Sync settings panel -->
+  <div id="sync-panel" style="display:none;background:white;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,0.1);padding:1rem 1.2rem;margin-bottom:1.2rem;font-size:0.88rem;">
+    <p style="font-weight:700;margin-bottom:0.5rem;color:#1e3a8a;">GitHub Sync Setup</p>
+    <p style="color:#374151;margin-bottom:0.6rem;">
+      Checklist state is saved to <code>state.json</code> in the GitHub repo so anyone who opens this page sees the same progress. Each person entering the page needs a token saved <em>once</em> in their browser.
+    </p>
+    <p style="margin-bottom:0.8rem;color:#374151;">
+      1. <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" style="color:#1a56db;">Create a fine-grained token</a> →
+      set <strong>Repository access</strong> to <em>justKaraG/retirementChecklist</em> →
+      under <strong>Permissions → Contents</strong> choose <em>Read and write</em> → Generate.<br>
+      2. Paste it below and click Save.
+    </p>
+    <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
+      <input type="password" id="pat-input" placeholder="github_pat_..." autocomplete="off"
+        style="flex:1;min-width:200px;padding:0.45rem 0.7rem;border:1.5px solid #cbd5e1;border-radius:6px;font-size:0.88rem;font-family:monospace;">
+      <button id="btn-save-pat" style="background:#1a56db;color:white;border:none;border-radius:6px;padding:0.45rem 1rem;font-weight:600;cursor:pointer;font-size:0.88rem;">Save Token</button>
+      <button id="btn-clear-pat" style="background:#fee2e2;color:#991b1b;border:none;border-radius:6px;padding:0.45rem 0.9rem;font-weight:600;cursor:pointer;font-size:0.88rem;">Clear Token</button>
+    </div>
+    <p id="pat-status" style="margin-top:0.5rem;font-size:0.8rem;color:#64748b;"></p>
   </div>
 
   <!-- Progress -->
@@ -435,6 +456,10 @@
         <span id="jody-pct">0%</span>
       </div>
       <div class="progress-track"><div class="progress-fill jody" id="jody-bar" style="width:0%"></div></div>
+    </div>
+    <div style="width:100%;display:flex;align-items:center;justify-content:space-between;margin-top:0.4rem;">
+      <span id="sync-status" style="font-size:0.78rem;color:#64748b;">Loading...</span>
+      <button id="btn-force-sync" style="font-size:0.75rem;color:#1a56db;background:none;border:none;cursor:pointer;padding:0;text-decoration:underline;">Sync now</button>
     </div>
   </div>
 
@@ -1218,7 +1243,7 @@
 </main>
 
 <script>
-  // Tab navigation
+  // ── Tab navigation ─────────────────────────────────────────────
   function showTab(name) {
     document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -1226,14 +1251,20 @@
     event.currentTarget.classList.add('active');
   }
 
-  // ── State helpers ──────────────────────────────────────────────
+  // ── GitHub config ───────────────────────────────────────────────
+  const GH = {
+    owner: 'justKaraG',
+    repo:  'retirementChecklist',
+    file:  'state.json',
+    get rawUrl() { return `https://raw.githubusercontent.com/${this.owner}/${this.repo}/main/${this.file}`; },
+    get apiUrl() { return `https://api.github.com/repos/${this.owner}/${this.repo}/contents/${this.file}`; },
+    get pat()    { return localStorage.getItem('gh-pat') || ''; },
+    set pat(v)   { if (v) localStorage.setItem('gh-pat', v); else localStorage.removeItem('gh-pat'); }
+  };
+
+  // ── Checkboxes ─────────────────────────────────────────────────
   function getAllCheckboxes() {
     return [...document.querySelectorAll('input[type="checkbox"][data-key]')];
-  }
-
-  function encodeState() {
-    const checked = getAllCheckboxes().filter(c => c.checked).map(c => c.dataset.key);
-    return btoa(JSON.stringify(checked));
   }
 
   function applyState(keys) {
@@ -1248,46 +1279,133 @@
   function updateProgress() {
     const allSteve = document.querySelectorAll('.steve-cb');
     const allJody  = document.querySelectorAll('.jody-cb');
-    const steveDone = [...allSteve].filter(c => c.checked).length;
-    const jodyDone  = [...allJody].filter(c => c.checked).length;
-    const stevePct = Math.round((steveDone / allSteve.length) * 100);
-    const jodyPct  = Math.round((jodyDone  / allJody.length)  * 100);
-    document.getElementById('steve-bar').style.width = stevePct + '%';
-    document.getElementById('jody-bar').style.width  = jodyPct  + '%';
-    document.getElementById('steve-pct').textContent = stevePct + '%';
-    document.getElementById('jody-pct').textContent  = jodyPct  + '%';
+    const sDone = [...allSteve].filter(c => c.checked).length;
+    const jDone = [...allJody ].filter(c => c.checked).length;
+    const sPct  = Math.round((sDone / allSteve.length) * 100);
+    const jPct  = Math.round((jDone / allJody.length)  * 100);
+    document.getElementById('steve-bar').style.width  = sPct + '%';
+    document.getElementById('jody-bar').style.width   = jPct + '%';
+    document.getElementById('steve-pct').textContent  = sPct + '%';
+    document.getElementById('jody-pct').textContent   = jPct + '%';
   }
 
-  // ── Load state: URL hash wins, then localStorage ────────────────
-  const hash = new URLSearchParams(location.hash.slice(1));
-  if (hash.has('s')) {
-    try { applyState(JSON.parse(atob(hash.get('s')))); } catch(e) {}
-    // clean the hash without reloading
-    history.replaceState(null, '', location.pathname);
-  } else {
+  // ── Sync status ─────────────────────────────────────────────────
+  function setSyncStatus(msg, color) {
+    const el = document.getElementById('sync-status');
+    el.textContent = msg;
+    el.style.color = color || '#64748b';
+  }
+
+  // ── Load from GitHub (public raw, no auth needed) ───────────────
+  async function loadFromGitHub() {
+    setSyncStatus('Loading from GitHub…', '#0891b2');
+    try {
+      const res = await fetch(GH.rawUrl + '?t=' + Date.now());
+      if (res.ok) {
+        const data = await res.json();
+        applyState(data.checked || []);
+        updateProgress();
+        const when = data.lastUpdated ? new Date(data.lastUpdated).toLocaleString() : 'unknown';
+        setSyncStatus('✓ Synced — last saved ' + when, '#16a34a');
+        return true;
+      }
+    } catch(e) {}
+    // Fall back to localStorage
     getAllCheckboxes().forEach(cb => {
       if (localStorage.getItem('guide-' + cb.dataset.key) === 'true') cb.checked = true;
     });
+    updateProgress();
+    setSyncStatus(GH.pat ? 'No saved state yet — check something to create it' : '⚠ Add a GitHub token in ⚙ Sync Settings to share progress across devices', '#f59e0b');
+    return false;
   }
 
-  // ── Save on every change ────────────────────────────────────────
+  // ── Save to GitHub via Contents API ────────────────────────────
+  let saveTimer = null;
+
+  async function saveToGitHub() {
+    if (!GH.pat) {
+      setSyncStatus('⚠ No token — changes saved locally only. Add one in ⚙ Sync Settings.', '#f59e0b');
+      return;
+    }
+    setSyncStatus('Saving…', '#0891b2');
+    const state = {
+      checked:     getAllCheckboxes().filter(c => c.checked).map(c => c.dataset.key),
+      lastUpdated: new Date().toISOString()
+    };
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify(state, null, 2))));
+    try {
+      // Need the current file's SHA to update it (GitHub API requirement)
+      const metaRes = await fetch(GH.apiUrl, {
+        headers: { Authorization: 'Bearer ' + GH.pat, Accept: 'application/vnd.github+json' }
+      });
+      const body = { message: 'Update checklist state', content };
+      if (metaRes.ok) body.sha = (await metaRes.json()).sha;
+
+      const putRes = await fetch(GH.apiUrl, {
+        method: 'PUT',
+        headers: {
+          Authorization:  'Bearer ' + GH.pat,
+          Accept:         'application/vnd.github+json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+      });
+      if (putRes.ok) {
+        setSyncStatus('✓ Saved to GitHub at ' + new Date().toLocaleTimeString(), '#16a34a');
+      } else {
+        const err = await putRes.json().catch(() => ({}));
+        setSyncStatus('Save failed: ' + (err.message || putRes.status) + ' — check your token in ⚙ Sync Settings', '#ef4444');
+      }
+    } catch(e) {
+      setSyncStatus('Save failed: ' + e.message, '#ef4444');
+    }
+  }
+
+  function scheduleSave() {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(saveToGitHub, 1200);
+  }
+
+  // ── Wire up checkboxes ──────────────────────────────────────────
   getAllCheckboxes().forEach(cb => {
     cb.addEventListener('change', () => {
       localStorage.setItem('guide-' + cb.dataset.key, cb.checked);
       updateProgress();
+      scheduleSave();
     });
   });
 
-  // ── Share button ────────────────────────────────────────────────
-  document.getElementById('btn-share').addEventListener('click', () => {
-    const url = location.origin + location.pathname + '#s=' + encodeState();
-    navigator.clipboard.writeText(url).then(() => {
-      const btn = document.getElementById('btn-share');
-      const orig = btn.textContent;
-      btn.textContent = '✓ Link copied!';
-      btn.style.background = '#16a34a';
-      setTimeout(() => { btn.textContent = orig; btn.style.background = ''; }, 2500);
-    });
+  // ── Sync settings panel ─────────────────────────────────────────
+  const syncPanel = document.getElementById('sync-panel');
+  document.getElementById('btn-sync-settings').addEventListener('click', () => {
+    const open = syncPanel.style.display !== 'none';
+    syncPanel.style.display = open ? 'none' : 'block';
+    if (!open && GH.pat) {
+      const input = document.getElementById('pat-input');
+      input.value = '••••••••••••••••' + GH.pat.slice(-4);
+      document.getElementById('pat-status').textContent = '✓ Token is saved in this browser.';
+    }
+  });
+
+  document.getElementById('btn-save-pat').addEventListener('click', () => {
+    const val = document.getElementById('pat-input').value.trim();
+    if (!val || val.startsWith('•')) { document.getElementById('pat-status').textContent = 'Paste a new token first.'; return; }
+    GH.pat = val;
+    document.getElementById('pat-input').value = '••••••••••••••••' + val.slice(-4);
+    document.getElementById('pat-status').textContent = '✓ Token saved. Syncing now…';
+    saveToGitHub();
+  });
+
+  document.getElementById('btn-clear-pat').addEventListener('click', () => {
+    GH.pat = null;
+    document.getElementById('pat-input').value = '';
+    document.getElementById('pat-status').textContent = 'Token cleared from this browser.';
+    setSyncStatus('⚠ No token — changes saved locally only', '#f59e0b');
+  });
+
+  document.getElementById('btn-force-sync').addEventListener('click', () => {
+    clearTimeout(saveTimer);
+    saveToGitHub();
   });
 
   // ── Reset button ────────────────────────────────────────────────
@@ -1298,9 +1416,11 @@
       localStorage.removeItem('guide-' + cb.dataset.key);
     });
     updateProgress();
+    scheduleSave();
   });
 
-  updateProgress();
+  // ── Init ────────────────────────────────────────────────────────
+  loadFromGitHub();
 </script>
 
 </body>
