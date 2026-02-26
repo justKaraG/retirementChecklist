@@ -425,13 +425,14 @@
   <div id="sync-panel" style="display:none;background:white;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,0.1);padding:1rem 1.2rem;margin-bottom:1.2rem;font-size:0.88rem;">
     <p style="font-weight:700;margin-bottom:0.5rem;color:#1e3a8a;">GitHub Sync Setup</p>
     <p style="color:#374151;margin-bottom:0.6rem;">
-      Checklist state is saved to <code>state.json</code> in the GitHub repo so anyone who opens this page sees the same progress. Each person entering the page needs a token saved <em>once</em> in their browser.
+      Checklist progress is saved to GitHub so everyone sees the same checkboxes. You only need to do this once per browser/device.
     </p>
     <p style="margin-bottom:0.8rem;color:#374151;">
-      1. <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" style="color:#1a56db;">Create a fine-grained token</a> →
-      set <strong>Repository access</strong> to <em>justKaraG/retirementChecklist</em> →
-      under <strong>Permissions → Contents</strong> choose <em>Read and write</em> → Generate.<br>
-      2. Paste it below and click Save.
+      <strong>If Kara already sent you a token</strong> — just paste it below and click Save. Done.<br><br>
+      <strong>To create a token (Kara only, one time):</strong><br>
+      1. <a href="https://github.com/settings/tokens/new?scopes=public_repo&description=RetirementChecklist" target="_blank" style="color:#1a56db;">Click here → GitHub will pre-fill the settings</a><br>
+      2. Scroll to the bottom, click <strong>Generate token</strong>, copy it.<br>
+      3. Paste it below — then text/email the same token to Steve &amp; Jody to paste on their devices.
     </p>
     <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
       <input type="password" id="pat-input" placeholder="github_pat_..." autocomplete="off"
