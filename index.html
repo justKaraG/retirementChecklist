@@ -211,6 +211,33 @@
       letter-spacing: 0.03em;
       line-height: 1.8;
     }
+    /* Skip button — appears on hover next to each checkbox */
+    .skip-btn {
+      display: none;
+      background: none;
+      border: 1px solid #e2e8f0;
+      border-radius: 4px;
+      color: #cbd5e1;
+      cursor: pointer;
+      font-size: 0.68rem;
+      padding: 0.1rem 0.3rem;
+      margin-left: 0.25rem;
+      line-height: 1.6;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+    .check-cell:hover .skip-btn { display: inline-block; }
+    .skip-btn:hover { background: #fff1f2; border-color: #fca5a5; color: #ef4444; }
+    .skip-btn.skipped {
+      display: inline-block;
+      background: #f8fafc;
+      border-color: #e2e8f0;
+      color: #94a3b8;
+      text-decoration: line-through;
+    }
+    tr.row-skipped td { opacity: 0.4; }
+    tr.row-skipped .skip-btn,
+    tr.row-skipped .check-cell { opacity: 1; }
     .must-steve { font-size: 0.72rem; background: #dbeafe; color: #1e40af; border-radius: 4px; padding: 0.1rem 0.4rem; font-weight: 700; }
     .must-jody  { font-size: 0.72rem; background: #fce7f3; color: #9d174d; border-radius: 4px; padding: 0.1rem 0.4rem; font-weight: 700; }
     .must-both  { font-size: 0.72rem; background: #dcfce7; color: #166534; border-radius: 4px; padding: 0.1rem 0.4rem; font-weight: 700; }
@@ -1647,6 +1674,44 @@
     return [...document.querySelectorAll('input[type="checkbox"][data-key]')];
   }
 
+  // ── Skip state ──────────────────────────────────────────────────
+  function getSkippedSet() {
+    try { return new Set(JSON.parse(localStorage.getItem('skipped-keys') || '[]')); }
+    catch(e) { return new Set(); }
+  }
+  function saveSkippedSet(set) {
+    localStorage.setItem('skipped-keys', JSON.stringify([...set]));
+  }
+
+  function renderSkip(key, isSkipped) {
+    const cb  = document.querySelector(`input[data-key="${key}"]`);
+    const btn = document.querySelector(`.skip-btn[data-skip-key="${key}"]`);
+    const row = cb ? cb.closest('tr') : null;
+    if (!cb || !btn) return;
+    if (isSkipped) {
+      cb.checked = false;
+      cb.style.visibility = 'hidden';
+      btn.textContent = '↩ undo';
+      btn.classList.add('skipped');
+      btn.title = 'Click to un-skip';
+      if (row) row.classList.add('row-skipped');
+    } else {
+      cb.style.visibility = '';
+      btn.textContent = '✗ skip';
+      btn.classList.remove('skipped');
+      btn.title = 'Mark as not going to do';
+      if (row) row.classList.remove('row-skipped');
+    }
+  }
+
+  function applySkipped(keys) {
+    const set = new Set(keys);
+    document.querySelectorAll('.skip-btn').forEach(btn => {
+      renderSkip(btn.dataset.skipKey, set.has(btn.dataset.skipKey));
+    });
+    saveSkippedSet(set);
+  }
+
   function applyState(keys) {
     const set = new Set(keys);
     getAllCheckboxes().forEach(cb => {
@@ -1655,14 +1720,15 @@
     });
   }
 
-  // ── Progress bars ───────────────────────────────────────────────
+  // ── Progress bars (skipped items excluded from total) ───────────
   function updateProgress() {
-    const allSteve = document.querySelectorAll('.steve-cb');
-    const allJody  = document.querySelectorAll('.jody-cb');
-    const sDone = [...allSteve].filter(c => c.checked).length;
-    const jDone = [...allJody ].filter(c => c.checked).length;
-    const sPct  = Math.round((sDone / allSteve.length) * 100);
-    const jPct  = Math.round((jDone / allJody.length)  * 100);
+    const skipped = getSkippedSet();
+    const allSteve = [...document.querySelectorAll('.steve-cb')].filter(c => !skipped.has(c.dataset.key));
+    const allJody  = [...document.querySelectorAll('.jody-cb') ].filter(c => !skipped.has(c.dataset.key));
+    const sDone = allSteve.filter(c => c.checked).length;
+    const jDone = allJody.filter(c => c.checked).length;
+    const sPct  = allSteve.length ? Math.round((sDone / allSteve.length) * 100) : 100;
+    const jPct  = allJody.length  ? Math.round((jDone / allJody.length)  * 100) : 100;
     document.getElementById('steve-bar').style.width  = sPct + '%';
     document.getElementById('jody-bar').style.width   = jPct + '%';
     document.getElementById('steve-pct').textContent  = sPct + '%';
@@ -1684,6 +1750,7 @@
       if (res.ok) {
         const data = await res.json();
         applyState(data.checked || []);
+        applySkipped(data.skipped || []);
         updateProgress();
         const when = data.lastUpdated ? new Date(data.lastUpdated).toLocaleString() : 'unknown';
         setSyncStatus('✓ Synced — last saved ' + when, '#16a34a');
@@ -1710,6 +1777,7 @@
     setSyncStatus('Saving…', '#0891b2');
     const state = {
       checked:     getAllCheckboxes().filter(c => c.checked).map(c => c.dataset.key),
+      skipped:     [...getSkippedSet()],
       lastUpdated: new Date().toISOString()
     };
     const content = btoa(unescape(encodeURIComponent(JSON.stringify(state, null, 2))));
@@ -1746,6 +1814,16 @@
     saveTimer = setTimeout(saveToGitHub, 1200);
   }
 
+  // ── Add skip buttons next to every real checkbox ────────────────
+  getAllCheckboxes().forEach(cb => {
+    const btn = document.createElement('button');
+    btn.className = 'skip-btn';
+    btn.dataset.skipKey = cb.dataset.key;
+    btn.textContent = '✗ skip';
+    btn.title = 'Mark as not going to do';
+    cb.parentElement.appendChild(btn);
+  });
+
   // ── Wire up checkboxes ──────────────────────────────────────────
   getAllCheckboxes().forEach(cb => {
     cb.addEventListener('change', () => {
@@ -1753,6 +1831,20 @@
       updateProgress();
       scheduleSave();
     });
+  });
+
+  // ── Wire up skip buttons ────────────────────────────────────────
+  document.addEventListener('click', e => {
+    const btn = e.target.closest('.skip-btn');
+    if (!btn) return;
+    const key     = btn.dataset.skipKey;
+    const skipped = getSkippedSet();
+    const nowSkip = !skipped.has(key);
+    if (nowSkip) skipped.add(key); else skipped.delete(key);
+    renderSkip(key, nowSkip);
+    saveSkippedSet(skipped);
+    updateProgress();
+    scheduleSave();
   });
 
   // ── Sync settings panel ─────────────────────────────────────────
@@ -1795,6 +1887,8 @@
       cb.checked = false;
       localStorage.removeItem('guide-' + cb.dataset.key);
     });
+    applySkipped([]);
+    saveSkippedSet(new Set());
     updateProgress();
     scheduleSave();
   });
