@@ -1,0 +1,234 @@
+name: SSA Appointment Checker
+
+# Runs every 30 min on weekdays during SSA business hours (9am–4pm ET = 13:00–20:00 UTC)
+# Only texts if it finds a slot EARLIER than April 23 — completely silent otherwise.
+# Disable: Actions tab → this workflow → ⋯ → Disable workflow
+
+on:
+  schedule:
+    - cron: '0,30 13-20 * * 1-5'
+  workflow_dispatch:   # lets you trigger a manual test from the Actions tab
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8   # give up if stuck (e.g. hard CAPTCHA block)
+
+    steps:
+      - name: Install system dependencies
+        run: sudo apt-get install -y xvfb
+
+      - name: Install Python dependencies
+        run: pip install playwright playwright-stealth
+
+      - name: Install Chromium
+        run: playwright install chromium
+
+      - name: Check for earlier SSA appointments
+        env:
+          GMAIL_FROM:     ${{ secrets.GMAIL_FROM }}
+          GMAIL_APP_PASS: ${{ secrets.GMAIL_APP_PASS }}
+          PHONE_NUMBER:   ${{ secrets.PHONE_NUMBER }}
+        run: |
+          xvfb-run --auto-servernum python3 - <<'PYEOF'
+          import os, sys, re, smtplib, time
+          from datetime import datetime
+          from email.mime.text import MIMEText
+          from playwright.sync_api import sync_playwright, TimeoutError as PWT
+
+          # ── Config ────────────────────────────────────────────────
+          TARGET      = datetime(2026, 4, 23)
+          OFFICE_HINT = "Pool Road"          # partial name of the SSA office
+          SSA_URL     = "https://www.ssa.gov/manage-benefits/make-an-appointment"
+
+          GMAIL    = os.environ.get("GMAIL_FROM", "")
+          PASSWORD = os.environ.get("GMAIL_APP_PASS", "")
+          PHONE    = os.environ.get("PHONE_NUMBER", "")
+          # ─────────────────────────────────────────────────────────
+
+          def send_sms(msg):
+              if not all([GMAIL, PASSWORD, PHONE]):
+                  print("Missing secrets — skipping SMS"); return
+              m = MIMEText(msg)
+              m["Subject"] = "SSA Earlier Appt Found!"
+              m["From"]    = GMAIL
+              m["To"]      = PHONE + "@tmomail.net"
+              with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=15) as s:
+                  s.login(GMAIL, PASSWORD)
+                  s.send_message(m)
+              print("SMS sent!")
+
+          def parse_date(text):
+              text = text.strip()
+              for fmt in ("%B %d, %Y", "%b %d, %Y", "%m/%d/%Y",
+                          "%Y-%m-%d", "%A, %B %d, %Y", "%B %d %Y"):
+                  try:
+                      return datetime.strptime(text, fmt)
+                  except ValueError:
+                      continue
+              return None
+
+          def find_earlier_dates(page):
+              """Scan visible page for any bookable date before TARGET."""
+              found = []
+              for el in page.query_selector_all("td, button, a, [aria-label], [data-date]"):
+                  try:
+                      for raw in [el.get_attribute("aria-label") or "",
+                                  el.get_attribute("data-date") or "",
+                                  el.inner_text()]:
+                          raw = raw.strip()
+                          if not raw or len(raw) > 50:
+                              continue
+                          dt = parse_date(raw)
+                          if dt and datetime(2026, 2, 1) < dt < TARGET:
+                              # Make sure element is actually clickable/enabled
+                              disabled = el.get_attribute("disabled") or \
+                                         el.get_attribute("aria-disabled") or ""
+                              cls = el.get_attribute("class") or ""
+                              if "disabled" not in cls.lower() and not disabled:
+                                  found.append(raw)
+                  except Exception:
+                      continue
+              return list(dict.fromkeys(found))   # dedupe
+
+          def click_first(page, *selectors, timeout=5000):
+              """Try each selector in order; click the first visible one found."""
+              for sel in selectors:
+                  try:
+                      el = page.wait_for_selector(sel, timeout=timeout, state="visible")
+                      if el:
+                          el.click()
+                          return True
+                  except PWT:
+                      continue
+              return False
+
+          def wait_and_fill(page, selector, value, timeout=5000):
+              try:
+                  el = page.wait_for_selector(selector, timeout=timeout, state="visible")
+                  el.fill(value)
+                  return True
+              except PWT:
+                  return False
+
+          with sync_playwright() as pw:
+              # ── Launch with stealth settings ──────────────────────
+              try:
+                  from playwright_stealth import stealth_sync
+                  stealth_available = True
+              except ImportError:
+                  stealth_available = False
+
+              browser = pw.chromium.launch(
+                  headless=False,    # non-headless via Xvfb looks more human
+                  args=["--disable-blink-features=AutomationControlled",
+                        "--no-sandbox", "--disable-dev-shm-usage"]
+              )
+              ctx = browser.new_context(
+                  viewport={"width": 1280, "height": 800},
+                  user_agent=(
+                      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                      "AppleWebKit/537.36 (KHTML, like Gecko) "
+                      "Chrome/121.0.0.0 Safari/537.36"
+                  ),
+                  locale="en-US",
+                  timezone_id="America/New_York"
+              )
+              page = ctx.new_page()
+              if stealth_available:
+                  stealth_sync(page)
+
+              # ── Step 1: Land on the appointment page ──────────────
+              print("→ Loading SSA appointment page…")
+              page.goto(SSA_URL, wait_until="domcontentloaded", timeout=30000)
+              page.wait_for_timeout(3000)   # let reCAPTCHA settle
+
+              # ── Step 2: Start / Get started button ────────────────
+              print("→ Looking for start button…")
+              click_first(page,
+                  "text=Schedule an Appointment",
+                  "text=Get Started",
+                  "text=Make an Appointment",
+                  "a[href*='appointment']",
+                  timeout=8000
+              )
+              page.wait_for_timeout(2000)
+
+              # ── Step 3: Questionnaire — pick Medicare/Benefits ─────
+              print("→ Filling questionnaire…")
+              # Try to select a Medicare-related option
+              for label in ["Medicare", "Apply for Benefits", "Benefits",
+                            "Enroll in Medicare", "Help with Medicare"]:
+                  try:
+                      el = page.get_by_label(label)
+                      if el and el.is_visible():
+                          el.click()
+                          break
+                  except Exception:
+                      pass
+              # Hit Continue / Next
+              click_first(page, "text=Continue", "text=Next",
+                          "button[type=submit]", timeout=5000)
+              page.wait_for_timeout(2000)
+
+              # ── Step 4: Office selection — search for Pool Road ────
+              print(f"→ Selecting office: {OFFICE_HINT}…")
+              # Try a zip/city search field
+              for sel in ["input[placeholder*='zip' i]", "input[placeholder*='city' i]",
+                          "input[id*='office' i]", "input[name*='office' i]",
+                          "input[type='text']"]:
+                  if wait_and_fill(page, sel, "Raleigh", timeout=4000):
+                      break
+              click_first(page, "text=Search", "text=Find", "button[type=submit]",
+                          timeout=4000)
+              page.wait_for_timeout(2000)
+
+              # Click the specific office
+              try:
+                  office_el = page.get_by_text(OFFICE_HINT, exact=False)
+                  if office_el:
+                      office_el.first.click()
+                      page.wait_for_timeout(1500)
+              except Exception:
+                  pass
+
+              click_first(page, "text=Continue", "text=Next",
+                          "text=Select", "button[type=submit]", timeout=4000)
+              page.wait_for_timeout(2000)
+
+              # ── Step 5: Check the date picker ─────────────────────
+              print("→ Checking date picker…")
+              page.wait_for_timeout(3000)   # let calendar load
+
+              earlier = find_earlier_dates(page)
+
+              # Also look back a month if there's a prev button
+              for prev_sel in ["[aria-label*='previous' i]", "[aria-label*='prev' i]",
+                               ".ui-datepicker-prev", "button:has-text('<')",
+                               "button:has-text('‹')"]:
+                  try:
+                      btn = page.query_selector(prev_sel)
+                      if btn and btn.is_visible() and not btn.is_disabled():
+                          btn.click()
+                          page.wait_for_timeout(1500)
+                          earlier += find_earlier_dates(page)
+                          break
+                  except Exception:
+                      continue
+
+              browser.close()
+
+              # ── Report ─────────────────────────────────────────────
+              earlier = list(dict.fromkeys(earlier))   # dedupe
+              if earlier:
+                  dates_str = ", ".join(earlier[:3])
+                  msg = (f"Earlier SSA slot found: {dates_str} "
+                         f"(before Apr 23). Book now: {SSA_URL}")
+                  print(f"FOUND: {msg}")
+                  send_sms(msg)
+                  sys.exit(0)
+              else:
+                  print("No earlier dates found — next check in 30 min.")
+                  sys.exit(0)
+
+          PYEOF
