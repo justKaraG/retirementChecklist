@@ -5,10 +5,12 @@
     "m-doc-rx-j",
     "m-apply-j",
     "f-ssret-s",
+    "f-ssa44-s",
+    "f-ssa44-j",
     "f-1020-s",
     "f-1020-j",
     "f-dd-s",
     "f-dd-j"
   ],
-  "lastUpdated": "2026-02-26T21:08:03.789Z"
+  "lastUpdated": "2026-02-26T21:08:11.856Z"
 }
