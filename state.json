@@ -1,16 +1,12 @@
 {
   "checked": [
     "m-doc-sscard-j",
+    "m-doc-birth-s",
     "m-doc-birth-j",
+    "m-doc-rx-s",
     "m-doc-rx-j",
     "m-apply-j",
-    "f-ssret-s",
-    "f-ssa44-s",
-    "f-ssa44-j",
-    "f-1020-s",
-    "f-1020-j",
-    "f-dd-s",
-    "f-dd-j"
+    "ss-myss-j"
   ],
-  "lastUpdated": "2026-02-26T21:08:11.856Z"
+  "lastUpdated": "2026-02-26T21:08:17.670Z"
 }
