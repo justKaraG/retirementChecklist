@@ -1750,24 +1750,13 @@
   <div class="card">
     <div class="card-header"><div class="card-icon blue">📅</div><h2>Enrollment Calendar</h2></div>
     <div style="padding:0.8rem 1.2rem 0.5rem;">
-      <p style="font-size:0.85rem;color:#4b5563;margin-bottom:1rem;">Enter birthdays to see personalized IEP &amp; Medigap windows. All enrollment periods are shaded directly on the calendar.</p>
+      <div class="alert info" style="margin-bottom:1rem;">
+        <strong>IEP does not apply</strong> — Steve (67) and Jody (66) are both past 65, so their Initial Enrollment Periods have already closed. Because they were covered by Steve's employer plan, <strong>no late penalty applies</strong>. Instead, they have an <strong>8-month Special Enrollment Period</strong> starting March 1, 2026 (when Steve retires and coverage ends). Both must enroll in Part B by <strong>October 31, 2026</strong>.
+      </div>
 
-      <div style="display:flex;gap:1.2rem;flex-wrap:wrap;margin-bottom:1rem;align-items:flex-end;">
-        <label style="font-size:0.85rem;font-weight:600;color:#374151;display:flex;flex-direction:column;gap:0.2rem;">
-          Steve's birthday
-          <input type="date" id="steve-bday" style="font-size:0.85rem;border:1px solid #e2e8f0;border-radius:6px;padding:0.3rem 0.5rem;color:#1a202c;">
-        </label>
-        <label style="font-size:0.85rem;font-weight:600;color:#374151;display:flex;flex-direction:column;gap:0.2rem;">
-          Jody's birthday
-          <input type="date" id="jody-bday" style="font-size:0.85rem;border:1px solid #e2e8f0;border-radius:6px;padding:0.3rem 0.5rem;color:#1a202c;">
-        </label>
-        <div>
-          <div style="font-size:0.85rem;font-weight:600;color:#374151;margin-bottom:0.2rem;">Year</div>
-          <div style="display:flex;gap:0.4rem;">
-            <button class="year-btn active" data-year="2026" onclick="setCalYear(2026,this)">2026</button>
-            <button class="year-btn" data-year="2027" onclick="setCalYear(2027,this)">2027</button>
-          </div>
-        </div>
+      <div style="display:flex;gap:0.4rem;margin-bottom:1.2rem;">
+        <button class="year-btn active" data-year="2026" onclick="setCalYear(2026,this)">2026</button>
+        <button class="year-btn" data-year="2027" onclick="setCalYear(2027,this)">2027</button>
       </div>
 
       <div id="cal-legend" style="display:flex;flex-wrap:wrap;gap:0.45rem;margin-bottom:1.1rem;font-size:0.77rem;"></div>
@@ -2135,6 +2124,13 @@
       ranges: [['2026-03-01','2026-10-31']]
     },
     {
+      id: 'jody-sep',
+      label: "Jody's 8-Month SEP Window",
+      note: 'Jody loses coverage when Steve retires — her SEP also runs Mar 1–Oct 31, 2026.',
+      bg: '#fdf2f8', text: '#9d174d', border: '#f9a8d4',
+      ranges: [['2026-03-01','2026-10-31']]
+    },
+    {
       id: 'jody-ssa',
       label: "Jody's SSA Interview",
       note: 'Bring marriage cert, SS cards, birth certs. April 23, 2026.',
@@ -2163,44 +2159,8 @@
     return y + '-' + String(m+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
   }
 
-  function getIEP(bdayVal) {
-    // bdayVal = "YYYY-MM-DD"
-    const [by, bm] = bdayVal.split('-').map(Number);
-    const y65 = by + 65;  // year they turn 65
-    const mIdx = bm - 1;  // 0-based birthday month
-    const start = new Date(y65, mIdx - 3, 1);
-    const end   = new Date(y65, mIdx + 4, 0);  // day 0 = last day of prev month
-    return [fmtDate(start.getFullYear(), start.getMonth(), start.getDate()),
-            fmtDate(end.getFullYear(),   end.getMonth(),   end.getDate())];
-  }
-
-  function getMedigap(bdayVal) {
-    const [by, bm] = bdayVal.split('-').map(Number);
-    const y65  = by + 65;
-    const mIdx = bm - 1;
-    const start = new Date(y65, mIdx, 1);
-    const end   = new Date(y65, mIdx + 6, 0);
-    return [fmtDate(start.getFullYear(), start.getMonth(), start.getDate()),
-            fmtDate(end.getFullYear(),   end.getMonth(),   end.getDate())];
-  }
-
   function buildCalEvents() {
-    const events = CAL_BASE_EVENTS.map(e => ({...e, ranges: e.ranges.map(r => [...r])}));
-    const steveBday = document.getElementById('steve-bday')?.value;
-    const jodyBday  = document.getElementById('jody-bday')?.value;
-    if (steveBday) {
-      const [s, e] = getIEP(steveBday);
-      events.push({ id:'steve-iep', label:"Steve's IEP (Medicare)", note:'7-month Initial Enrollment Period.', bg:'#dbeafe', text:'#1e3a8a', border:'#60a5fa', ranges:[[s,e]] });
-      const [ms, me] = getMedigap(steveBday);
-      events.push({ id:'steve-mg', label:"Steve's Medigap Window", note:'Guaranteed acceptance — do not miss.', bg:'#e0e7ff', text:'#3730a3', border:'#818cf8', ranges:[[ms,me]] });
-    }
-    if (jodyBday) {
-      const [s, e] = getIEP(jodyBday);
-      events.push({ id:'jody-iep', label:"Jody's IEP (Medicare)", note:'7-month Initial Enrollment Period.', bg:'#fce7f3', text:'#831843', border:'#f9a8d4', ranges:[[s,e]] });
-      const [ms, me] = getMedigap(jodyBday);
-      events.push({ id:'jody-mg', label:"Jody's Medigap Window", note:'Guaranteed acceptance — do not miss.', bg:'#fdf4ff', text:'#7e22ce', border:'#d8b4fe', ranges:[[ms,me]] });
-    }
-    return events;
+    return CAL_BASE_EVENTS.map(e => ({...e, ranges: e.ranges.map(r => [...r])}));
   }
 
   function renderCalMonth(year, monthIdx, events) {
@@ -2312,22 +2272,6 @@
     btn.classList.add('active');
     renderCalendar();
   }
-
-  // Re-render when birthdays change
-  ['steve-bday','jody-bday'].forEach(id => {
-    document.getElementById(id)?.addEventListener('change', () => {
-      const map = { steveBday: document.getElementById('steve-bday').value, jodyBday: document.getElementById('jody-bday').value };
-      localStorage.setItem('cal-birthdays', JSON.stringify(map));
-      renderCalendar();
-    });
-  });
-
-  // Restore saved birthdays
-  try {
-    const saved = JSON.parse(localStorage.getItem('cal-birthdays') || '{}');
-    if (saved.steveBday) document.getElementById('steve-bday').value = saved.steveBday;
-    if (saved.jodyBday)  document.getElementById('jody-bday').value  = saved.jodyBday;
-  } catch(e) {}
 
   renderCalendar();
 
