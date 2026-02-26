@@ -1,0 +1,1307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Steve & Jody — Medicare & Social Security Guide</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f0f4f8;
+      color: #1a202c;
+      line-height: 1.6;
+      font-size: 15px;
+    }
+    header {
+      background: linear-gradient(135deg, #1a56db 0%, #1e429f 100%);
+      color: white;
+      padding: 1.8rem 1.5rem 1.5rem;
+      text-align: center;
+    }
+    header h1 { font-size: 1.85rem; margin-bottom: 0.25rem; }
+    header p { opacity: 0.88; font-size: 1rem; }
+    .person-legend {
+      display: flex;
+      justify-content: center;
+      gap: 1.2rem;
+      margin-top: 0.9rem;
+      flex-wrap: wrap;
+    }
+    .legend-pill {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 20px;
+      padding: 0.25rem 0.8rem;
+      font-size: 0.85rem;
+    }
+    .dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+    .dot.steve { background: #60a5fa; }
+    .dot.jody  { background: #f9a8d4; }
+    .dot.both  { background: #86efac; }
+    .dot.na    { background: #94a3b8; }
+
+    /* NAV TABS */
+    .tab-bar {
+      background: white;
+      border-bottom: 2px solid #e2e8f0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .tab-bar::-webkit-scrollbar { display: none; }
+    .tab {
+      padding: 0.75rem 1.2rem;
+      font-weight: 600;
+      font-size: 0.88rem;
+      color: #64748b;
+      cursor: pointer;
+      white-space: nowrap;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      transition: all 0.15s;
+      user-select: none;
+    }
+    .tab:hover { color: #1a56db; }
+    .tab.active { color: #1a56db; border-bottom-color: #1a56db; }
+
+    main {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 1.4rem 1.2rem 2rem;
+    }
+
+    .page-section { display: none; }
+    .page-section.active { display: block; }
+
+    /* PROGRESS BAR */
+    .progress-bar-wrap {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+      padding: 0.9rem 1.2rem;
+      margin-bottom: 1.2rem;
+      display: flex;
+      gap: 1.2rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .progress-person { flex: 1; min-width: 180px; }
+    .progress-label { font-size: 0.8rem; font-weight: 700; color: #374151; margin-bottom: 0.3rem; display: flex; justify-content: space-between; }
+    .progress-track { height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; }
+    .progress-fill { height: 100%; border-radius: 4px; transition: width 0.3s ease; }
+    .progress-fill.steve { background: #3b82f6; }
+    .progress-fill.jody  { background: #ec4899; }
+
+    /* ALERT BOX */
+    .alert {
+      border-radius: 8px;
+      padding: 0.9rem 1.1rem;
+      margin-bottom: 1.1rem;
+      font-size: 0.88rem;
+    }
+    .alert.warn { background: #fffbeb; border-left: 4px solid #f59e0b; }
+    .alert.warn strong { color: #92400e; }
+    .alert.warn p { color: #78350f; margin-top: 0.2rem; }
+    .alert.danger { background: #fee2e2; border-left: 4px solid #ef4444; }
+    .alert.danger strong { color: #7f1d1d; }
+    .alert.danger p { color: #991b1b; margin-top: 0.2rem; }
+    .alert.info { background: #eff6ff; border-left: 4px solid #3b82f6; }
+    .alert.info strong { color: #1e40af; }
+    .alert.info p { color: #1e3a8a; margin-top: 0.2rem; }
+    .alert.jody-note { background: #fdf2f8; border-left: 4px solid #ec4899; }
+    .alert.jody-note strong { color: #9d174d; }
+    .alert.jody-note p { color: #831843; margin-top: 0.2rem; }
+
+    /* SECTION CARD */
+    .card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+      margin-bottom: 1.2rem;
+      overflow: hidden;
+    }
+    .card-header {
+      padding: 0.85rem 1.2rem;
+      border-bottom: 1px solid #f1f5f9;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .card-header h2 { font-size: 1rem; font-weight: 700; flex: 1; }
+    .card-icon {
+      width: 30px; height: 30px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+    .card-icon.blue { background: #dbeafe; }
+    .card-icon.red  { background: #fee2e2; }
+    .card-icon.green{ background: #dcfce7; }
+    .card-icon.pink { background: #fce7f3; }
+    .card-icon.amber{ background: #fef3c7; }
+
+    /* TASK TABLE */
+    .task-table { width: 100%; border-collapse: collapse; }
+    .task-table thead tr { background: #f8fafc; }
+    .task-table thead th {
+      padding: 0.5rem 0.9rem;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #64748b;
+      text-align: center;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .task-table thead th:first-child { text-align: left; }
+    .task-table thead th.steve-col { color: #1d4ed8; }
+    .task-table thead th.jody-col  { color: #be185d; }
+
+    .task-table tbody tr {
+      border-bottom: 1px solid #f1f5f9;
+      transition: background 0.1s;
+    }
+    .task-table tbody tr:last-child { border-bottom: none; }
+    .task-table tbody tr:hover { background: #fafbff; }
+    .task-table tbody tr.completed td:first-child { opacity: 0.45; }
+
+    .task-cell {
+      padding: 0.7rem 0.9rem;
+      vertical-align: top;
+    }
+    .task-desc { font-size: 0.88rem; line-height: 1.45; }
+    .task-desc a { color: #1a56db; }
+    .task-note {
+      font-size: 0.77rem;
+      color: #64748b;
+      margin-top: 0.2rem;
+      line-height: 1.35;
+    }
+    .task-note.jody { color: #be185d; }
+    .task-note.warn { color: #b45309; font-weight: 600; }
+
+    .check-cell {
+      padding: 0.7rem 0.5rem;
+      text-align: center;
+      vertical-align: middle;
+      width: 72px;
+    }
+    .check-cell input[type="checkbox"] {
+      width: 20px; height: 20px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    .check-cell input.steve-cb { accent-color: #2563eb; }
+    .check-cell input.jody-cb  { accent-color: #db2777; }
+
+    .na-pill {
+      display: inline-block;
+      background: #f1f5f9;
+      color: #94a3b8;
+      border-radius: 20px;
+      padding: 0.15rem 0.55rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      line-height: 1.8;
+    }
+    .must-steve { font-size: 0.72rem; background: #dbeafe; color: #1e40af; border-radius: 4px; padding: 0.1rem 0.4rem; font-weight: 700; }
+    .must-jody  { font-size: 0.72rem; background: #fce7f3; color: #9d174d; border-radius: 4px; padding: 0.1rem 0.4rem; font-weight: 700; }
+    .must-both  { font-size: 0.72rem; background: #dcfce7; color: #166534; border-radius: 4px; padding: 0.1rem 0.4rem; font-weight: 700; }
+
+    /* PART SUMMARY CARDS */
+    .part-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 0.7rem;
+      padding: 1rem 1.2rem;
+    }
+    .part-card {
+      border-radius: 9px;
+      padding: 0.8rem;
+      border: 1.5px solid #e2e8f0;
+      background: #f8fafc;
+    }
+    .part-card .label { font-weight: 800; font-size: 0.95rem; margin-bottom: 0.25rem; }
+    .part-card p { font-size: 0.78rem; color: #4b5563; }
+    .part-card .cost { font-size: 0.78rem; font-weight: 700; color: #1f2937; margin-top: 0.35rem; }
+    .part-card.a .label { color: #0891b2; }
+    .part-card.b .label { color: #7c3aed; }
+    .part-card.c .label { color: #d97706; }
+    .part-card.d .label { color: #059669; }
+    .part-card.medigap .label { color: #1a56db; }
+
+    /* PENALTY CARDS */
+    .penalty-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.8rem;
+      padding: 1rem 1.2rem;
+    }
+    .penalty-card {
+      border: 2px solid #fecdd3;
+      border-radius: 10px;
+      padding: 0.8rem;
+      background: #fff8f8;
+    }
+    .penalty-card h4 { font-size: 0.88rem; color: #b91c1c; }
+    .penalty-card .amount { font-size: 1.2rem; font-weight: 800; color: #7f1d1d; margin: 0.25rem 0; }
+    .penalty-card p { font-size: 0.78rem; color: #6b7280; }
+
+    /* DEADLINE TIMELINE */
+    .timeline { padding: 1rem 1.2rem; }
+    .timeline-row {
+      display: flex;
+      gap: 0.5rem;
+      align-items: stretch;
+      margin-bottom: 0.7rem;
+      font-size: 0.84rem;
+    }
+    .timeline-label {
+      width: 145px;
+      flex-shrink: 0;
+      font-weight: 700;
+      color: #374151;
+      padding-top: 0.1rem;
+    }
+    .timeline-bar {
+      flex: 1;
+      border-radius: 6px;
+      padding: 0.35rem 0.7rem;
+      display: flex;
+      flex-direction: column;
+    }
+    .timeline-bar.ok   { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e3a8a; }
+    .timeline-bar.warn { background: #fffbeb; border: 1px solid #fde68a; color: #78350f; }
+    .timeline-bar.bad  { background: #fee2e2; border: 1px solid #fecdd3; color: #7f1d1d; }
+    .timeline-bar small { font-size: 0.74rem; opacity: 0.8; }
+
+    /* LINKS GRID */
+    .links-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0.7rem;
+      padding: 1rem 1.2rem;
+    }
+    .link-card {
+      border: 1.5px solid #bfdbfe;
+      border-radius: 9px;
+      padding: 0.8rem;
+      background: #eff6ff;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+      transition: all 0.15s;
+    }
+    .link-card:hover { background: #dbeafe; border-color: #2563eb; transform: translateY(-1px); }
+    .link-card .lt { font-weight: 700; color: #1a56db; font-size: 0.86rem; }
+    .link-card .ld { font-size: 0.78rem; color: #374151; margin-top: 0.15rem; }
+    .link-card .lu { font-size: 0.71rem; color: #64748b; margin-top: 0.2rem; word-break: break-all; }
+
+    /* DOCS */
+    .docs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 0.55rem;
+      padding: 1rem 1.2rem;
+    }
+    .doc-item {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 8px;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.83rem;
+    }
+
+    /* SS AMOUNT CARDS */
+    .ss-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.8rem;
+      padding: 1rem 1.2rem;
+    }
+    .ss-card {
+      border-radius: 10px;
+      padding: 1rem;
+      border: 2px solid #e2e8f0;
+    }
+    .ss-card.steve-card { border-color: #93c5fd; background: #eff6ff; }
+    .ss-card.jody-card  { border-color: #f9a8d4; background: #fdf2f8; }
+    .ss-card h3 { font-size: 0.95rem; margin-bottom: 0.6rem; }
+    .ss-card.steve-card h3 { color: #1d4ed8; }
+    .ss-card.jody-card h3  { color: #be185d; }
+    .ss-card ul { list-style: none; }
+    .ss-card ul li { font-size: 0.82rem; color: #374151; padding: 0.2rem 0; display: flex; gap: 0.4rem; }
+    .ss-card ul li::before { content: "•"; color: #94a3b8; flex-shrink: 0; }
+
+    /* PHONE */
+    .phone-bar {
+      background: #1e3a8a;
+      color: white;
+      border-radius: 10px;
+      padding: 0.9rem 1.2rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem 2rem;
+      align-items: center;
+      margin: 0 1.2rem 1rem;
+    }
+    .phone-item { font-size: 0.84rem; }
+    .phone-item strong { display: block; font-size: 0.95rem; }
+
+    /* PRINT */
+    .print-btn {
+      background: #1a56db;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 0.65rem 1.4rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 1.2rem;
+      display: block;
+      width: 100%;
+    }
+    .print-btn:hover { background: #1e429f; }
+
+    @media print {
+      .tab-bar, .print-btn { display: none; }
+      .page-section { display: block !important; }
+      body { background: white; }
+      .card { box-shadow: none; border: 1px solid #e2e8f0; }
+    }
+    @media (max-width: 600px) {
+      .penalty-row, .ss-cards { grid-template-columns: 1fr; }
+      header h1 { font-size: 1.4rem; }
+      .timeline-label { width: 110px; font-size: 0.78rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Steve & Jody's Retirement Guide</h1>
+  <p>Medicare &amp; Social Security — Personalized Checklist</p>
+  <div class="person-legend">
+    <div class="legend-pill"><div class="dot steve"></div> Steve (full-time worker)</div>
+    <div class="legend-pill"><div class="dot jody"></div> Jody (stay-at-home, enrolls via Steve's record)</div>
+    <div class="legend-pill"><div class="dot na"></div> N/A = does not apply</div>
+  </div>
+</header>
+
+<div class="tab-bar">
+  <div class="tab active" onclick="showTab('overview')">Overview</div>
+  <div class="tab" onclick="showTab('medicare')">Medicare Checklist</div>
+  <div class="tab" onclick="showTab('ss')">Social Security Checklist</div>
+  <div class="tab" onclick="showTab('deadlines')">Deadlines & Penalties</div>
+  <div class="tab" onclick="showTab('links')">All Links & Contacts</div>
+</div>
+
+<main>
+
+<!-- ============================================================ -->
+<!-- OVERVIEW TAB -->
+<!-- ============================================================ -->
+<div id="tab-overview" class="page-section active">
+
+  <div style="display:flex;gap:0.6rem;margin-bottom:1.2rem;flex-wrap:wrap;">
+    <button class="print-btn" onclick="window.print()" style="flex:1;min-width:140px;margin:0;">Print This Guide</button>
+    <button id="btn-share" class="print-btn" style="flex:1;min-width:140px;margin:0;background:#0891b2;">Share Progress Link</button>
+    <button id="btn-reset" class="print-btn" style="flex:1;min-width:140px;margin:0;background:#6b7280;">Reset All</button>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-bar-wrap">
+    <div class="progress-person">
+      <div class="progress-label">
+        <span>Steve's Progress</span>
+        <span id="steve-pct">0%</span>
+      </div>
+      <div class="progress-track"><div class="progress-fill steve" id="steve-bar" style="width:0%"></div></div>
+    </div>
+    <div class="progress-person">
+      <div class="progress-label">
+        <span>Jody's Progress</span>
+        <span id="jody-pct">0%</span>
+      </div>
+      <div class="progress-track"><div class="progress-fill jody" id="jody-bar" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <!-- Key differences -->
+  <div class="alert jody-note">
+    <strong>Important: Jody's situation is different from Steve's</strong>
+    <p>As a stay-at-home mom, Jody qualifies for Medicare and Social Security through Steve's work record — not her own. She <strong>cannot apply online</strong> for Medicare (must call or visit SSA in person). Her Medicare and Social Security benefits also depend on Steve acting first in several cases.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="card-icon blue">📋</div><h2>What Medicare Parts Mean</h2></div>
+    <div class="part-grid">
+      <div class="part-card a">
+        <div class="label">Part A — Hospital</div>
+        <p>Inpatient hospital, skilled nursing, hospice, home health</p>
+        <div class="cost">Steve: FREE (40+ work quarters)<br>Jody: FREE via Steve's record</div>
+      </div>
+      <div class="part-card b">
+        <div class="label">Part B — Medical</div>
+        <p>Doctor visits, outpatient care, preventive services</p>
+        <div class="cost">$202.90/month each in 2026 — both pay separately</div>
+      </div>
+      <div class="part-card c">
+        <div class="label">Part C — Advantage</div>
+        <p>Private plan bundling A+B+usually D. Network restrictions apply.</p>
+        <div class="cost">Alternative to Original Medicare. Each person picks their own.</div>
+      </div>
+      <div class="part-card d">
+        <div class="label">Part D — Drugs</div>
+        <p>Prescription drug coverage. Each person needs their own plan.</p>
+        <div class="cost">~$38.99/mo base. Penalty if delayed 63+ days.</div>
+      </div>
+      <div class="part-card medigap">
+        <div class="label">Medigap — Supplement</div>
+        <p>Pays your share of costs left by Original Medicare. 6-month guaranteed window each.</p>
+        <div class="cost">Only with Original Medicare, not Medicare Advantage.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="card-icon pink">💵</div><h2>Social Security: What Each Person Gets</h2></div>
+    <div class="ss-cards">
+      <div class="ss-card steve-card">
+        <h3>Steve — Own Retirement Benefit</h3>
+        <ul>
+          <li>Based on his 35 highest earning years</li>
+          <li>Full benefit at age 67 (Full Retirement Age if born 1960+)</li>
+          <li>Take at 62 for reduced amount (up to 30% less)</li>
+          <li>Delay to 70 for maximum (8% more per year after FRA)</li>
+          <li>Apply online at ssa.gov/retirement</li>
+        </ul>
+      </div>
+      <div class="ss-card jody-card">
+        <h3>Jody — Spousal Benefit</h3>
+        <ul>
+          <li>Up to <strong>50% of Steve's full retirement benefit</strong></li>
+          <li>Steve must file first before Jody can claim</li>
+          <li>Reduced if Jody claims before her own FRA (age 67)</li>
+          <li>Jody must apply by <strong>phone or in-person</strong> at SSA — not online</li>
+          <li>Cannot exceed 50% of Steve's amount, even if he delays to 70</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="card-icon amber">⚠️</div><h2>Top Things NOT to Miss</h2></div>
+    <div style="padding: 0.8rem 1.2rem; display:flex; flex-direction:column; gap:0.6rem;">
+      <div class="alert danger" style="margin:0;">
+        <strong>Jody cannot enroll in Medicare online</strong>
+        <p>Because she has no personal work record, she must call SSA at 1-800-772-1213 or visit an office in person to enroll. Online enrollment won't work for her situation.</p>
+      </div>
+      <div class="alert danger" style="margin:0;">
+        <strong>Jody's spousal SS benefits require Steve to file first</strong>
+        <p>Jody cannot claim spousal Social Security benefits until Steve has filed for his own benefits. Plan the timing together.</p>
+      </div>
+      <div class="alert warn" style="margin:0;">
+        <strong>Medigap open enrollment is a one-time 6-month window</strong>
+        <p>Both Steve and Jody each have a 6-month window starting when they turn 65 AND have Part B. After it closes, insurers can deny coverage or charge more based on health conditions.</p>
+      </div>
+      <div class="alert warn" style="margin:0;">
+        <strong>Part D — enroll even if you take no prescriptions</strong>
+        <p>The 1%/month late penalty is permanent. Both need a Part D plan (or Medicare Advantage with drug coverage) to avoid it.</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============================================================ -->
+<!-- MEDICARE CHECKLIST TAB -->
+<!-- ============================================================ -->
+<div id="tab-medicare" class="page-section">
+
+  <div class="alert jody-note">
+    <strong>Jody's Medicare enrolls through Steve's work record</strong>
+    <p>Jody qualifies for premium-free Part A based on Steve's 40+ quarters. She must call SSA at <strong>1-800-772-1213</strong> or visit an office — she <strong>cannot use the online application</strong>. Her enrollment also requires that Steve is at least 62.</p>
+  </div>
+
+  <!-- BEFORE YOU ENROLL -->
+  <div class="card">
+    <div class="card-header"><div class="card-icon blue">📁</div><h2>Before You Enroll — Gather Documents</h2></div>
+    <table class="task-table">
+      <thead><tr>
+        <th>Task</th>
+        <th class="steve-col">Steve</th>
+        <th class="jody-col">Jody</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td class="task-cell">
+            <div class="task-desc">Gather your <strong>Social Security card</strong> and know your SSN</div>
+          </td>
+          <td class="check-cell"><input type="checkbox" class="steve-cb" data-key="m-doc-sscard-s"></td>
+          <td class="check-cell"><input type="checkbox" class="jody-cb" data-key="m-doc-sscard-j"></td>
+        </tr>
+        <tr>
+          <td class="task-cell">
+            <div class="task-desc">Gather <strong>birth certificate</strong> (original or certified copy)</div>
+          </td>
+          <td class="check-cell"><input type="checkbox" class="steve-cb" data-key="m-doc-birth-s"></td>
+          <td class="check-cell"><input type="checkbox" class="jody-cb" data-key="m-doc-birth-j"></td>
+        </tr>
+        <tr>
+          <td class="task-cell">
+            <div class="task-desc">Gather most recent <strong>W-2 or self-employment tax return</strong></div>
+            <div class="task-note">Jody: bring Steve's W-2 as well — enrollment is based on his record</div>
+          </td>
+          <td class="check-cell"><input type="checkbox" class="steve-cb" data-key="m-doc-w2-s"></td>
+          <td class="check-cell"><input type="checkbox" class="jody-cb" data-key="m-doc-w2-j"></td>
+        </tr>
+        <tr>
+          <td class="task-cell">
+            <div class="task-desc">Write down start/end dates and carrier name of <strong>any current health insurance</strong></div>
+          </td>
+          <td class="check-cell"><input type="checkbox" class="steve-cb" data-key="m-doc-ins-s"></td>
+          <td class="check-cell"><input type="checkbox" class="jody-cb" data-key="m-doc-ins-j"></td>
+        </tr>
+        <tr>
+          <td class="task-cell">
+            <div class="task-desc">If covered by <strong>employer plan</strong>: get a letter from HR confirming coverage is <strong>"creditable"</strong></div>
+            <div class="task-note warn">This determines whether you can delay Medicare without penalty. Critical step.</div>
+          </td>
+          <td class="check-cell"><input type="checkbox" class="steve-cb" data-key="m-doc-cred-s"></td>
+          <td class="check-cell"><input type="checkbox" class="jody-cb" data-key="m-doc-cred-j"></td>
+        </tr>
+        <tr>
+          <td class="task-cell">
+            <div class="task-desc">Make a list of all <strong>current prescription medications</strong> (names, doses, frequency)</div>
+            <div class="task-note">You'll need this to compare Part D drug plans at medicare.gov/plan-compare</div>
+          </td>
+          <td class="check-cell"><input type="checkbox" class="steve-cb" data-key="m-doc-rx-s"></td>
+          <td class="check-cell"><input type="checkbox" class="jody-cb" data-key="m-doc-rx-j"></td>
+        </tr>
+        <tr>
+          <td class="task-cell">
+            <div class="task-desc">Make a list of <strong>preferred doctors and hospitals</strong> to check plan network compatibility</div>
+          </td>
+          <td class="check-cell"><input type="checkbox" class="steve-cb" data-key="m-doc-dr-s"></td>
+          <td class="check-cell"><input type="checkbox" class="jody-cb" data-key="m-doc-dr-j"></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SIGN UP PART A & B -->
+  <div class="card">
+    <div class="card-header"><div class="card-icon blue">🏥</div><h2>Sign Up for Part A & Part B</h2></div>
+    <table class="task-table">
+      <thead><tr>
+        <th>Task</th>
+        <th class="steve-col">Steve</th>
+        <th class="jody-col">Jody</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td class="task-cell">
+            <div class="task-desc">Check if you're <strong>already auto-enrolled</strong> — look for your red-white-blue Medicare card in the mail 3 months before turning 65 (only if already receiving SS benefits)</div>
+          </td>
+          <td class="check-cell"><input type="checkbox" class="steve-cb" data-key="m-auto-s"></td>
+          <td class="check-cell"><input type="checkbox" class="jody-cb" data-key="m-auto-j"></td>
+        </tr>
+        <tr>
+          <td class="task-cell">
+            <div class="task-desc"><span class="must-steve">STEVE</span> Create a <strong>my Social Security account</strong> at <a href="https://www.ssa.gov/myaccount" target="_blank">ssa.gov/myaccount</a></div>
+          </td>
+          <td class="check-cell"><input type="checkbox" class="steve-cb" data-key="m-myss-s"></td>
+          <td class="check-cell"><div class="na-pill">N/A</div></td>
+        </tr>
+        <tr>
+          <td class="task-cell">
+            <div class="task-desc"><span class="must-steve">STEVE</span> Apply for Medicare <strong>online</strong> at <a href="https://www.ssa.gov/medicare/sign-up" target="_blank">ssa.gov/medicare/sign-up</a></div>
+            <div class="task-note">Fastest method. Do this within your 7-month Initial Enrollment Period.</div>
+          </td>
+          <td class="check-cell"><input type="checkbox" class="steve-cb" data-key="m-apply-s"></td>
+          <td class="check-cell"><div class="na-pill">N/A</div></td>
+        </tr>
+        <tr>
+          <td class="task-cell">
+            <div class="task-desc"><span class="must-jody">JODY</span> Call SSA at <strong>1-800-772-1213</strong> or visit a local SSA office to apply — <strong>you cannot apply online</strong> because you're enrolling through Steve's work record</div>
+            <div class="task-note jody">Have Steve's SSN and your marriage certificate ready. Must be married 1+ year.</div>
+          </td>
+          <td class="check-cell"><div class="na-pill">N/A</div></td>
+          <td class="check-cell"><input type="checkbox" class="jody-cb" data-key="m-apply-j"></td>
+        </tr>
+        <tr>
+          <td class="task-cell">
+            <div class="task-desc">Decide whether to take <strong>Part B now or delay</strong></div>
+            <div class="task-note">Only delay if you have creditable employer coverage. When in doubt, enroll — the penalty is permanent.</div>
+          </td>
+          <td class="check-cell"><input type="checkbox" class="steve-cb" data-key="m-partb-s"></td>
+          <td class="check-cell"><input type="checkbox" class="jody-cb" data-key="m-partb-j"></td>
+        </tr>
+        <tr>
+          <td class="task-cell">
+            <div class="task-desc">Receive your <strong>Medicare card</strong> in the mail and note your Medicare number</div>
+            <div class="task-note">Do NOT laminate it. Keep it safe — needed for all plan enrollment.</div>
+          </td>
+          <td class="check-cell"><input type="checkbox" class="steve-cb" data-key="m-card-s"></td>
+          <td class="check-cell"><input type="checkbox" class="jody-cb" data-key="m-card-j"></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- CHOOSE COVERAGE PATH -->
+  <div class="card">
+    <div class="card-header"><div class="card-icon green">🔀</div><h2>Choose Your Coverage Path</h2></div>
+    <div style="padding:0.7rem 1.2rem 0.4rem; font-size:0.85rem; color:#374151;">
+      Steve and Jody each choose their own path independently — they don't have to pick the same one.
+    </div>
+    <table class="task-table">
+      <thead><tr>
+        <th>Task</th>
+        <th class="steve-col">Steve</th>
+        <th class="jody-col">Jody</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td class="task-cell">
+            <div class="task-desc"><strong>Path A:</strong> Keep <strong>Original Medicare</strong> (Parts A + B) and separately add Part D + optional Medigap</div>
+            <div class="task-note">More flexibility — see any doctor that accepts Medicare nationwide.</div>
+          </td>
+          <td class="check-cell"><input type="checkbox" class="steve-cb" data-key="m-path-s"></td>
+          <td class="check-cell"><input type="checkbox" class="jody-cb" data-key="m-path-j"></td>
+        </tr>
+        <tr>
+          <td class="task-cell">
+            <div class="task-desc"><strong>Path B:</strong> Enroll in <strong>Medicare Advantage (Part C)</strong> — private plan bundling A + B + usually D</div>
+            <div class="task-note">Often includes dental/vision/hearing. Must use plan networks. Compare at <a href="https://www.medicare.gov/plan-compare" target="_blank">medicare.gov/plan-compare</a></div>
+          </td>
+          <td class="check-cell"><input type="checkbox" class="steve-cb" data-key="m-pathc-s"></td>
+          <td class="check-cell"><input type="checkbox" class="jody-cb" data-key="m-pathc-j"></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- PART D -->
+  <div class="card">
+    <div class="card-header"><div class="card-icon green">💊</div><h2>Part D — Prescription Drug Coverage</h2></div>
+    <table class="task-table">
+      <thead><tr>
+        <th>Task</th>
+        <th class="steve-col">Steve</th>
+        <th class="jody-col">Jody</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td class="task-cell">
+            <div class="task-desc">Compare Part D drug plans using your prescription list at <a href="https://www.medicare.gov/plan-compare" target="_blank">medicare.gov/plan-compare</a></div>
+          </td>
+          <td class="check-cell"><input type="checkbox" class="steve-cb" data-key="m-d-compare-s"></td>
+          <td class="check-cell"><input type="checkbox" class="jody-cb" data-key="m-d-compare-j"></td>
+        </tr>
+        <tr>
+          <td class="task-cell">
+            <div class="task-desc">Enroll in a <strong>Part D plan</strong> — even if you take no prescriptions right now</div>
+            <div class="task-note warn">Do NOT skip this step. Missing it by 63+ days triggers a permanent monthly penalty.</div>
+          </td>
+          <td class="check-cell"><input type="checkbox" class="steve-cb" data-key="m-d-enroll-s"></td>
+          <td class="check-cell"><input type="checkbox" class="jody-cb" data-key="m-d-enroll-j"></td>
+        </tr>
+        <tr>
+          <td class="task-cell">
+            <div class="task-desc">Check if you qualify for <strong>Extra Help</strong> (Low Income Subsidy) to reduce Part D costs at <a href="https://www.ssa.gov/medicare/part-d-extra-help" target="_blank">ssa.gov extra help</a></div>
+          </td>
+          <td class="check-cell"><input type="checkbox" class="steve-cb" data-key="m-d-help-s"></td>
+          <td class="check-cell"><input type="checkbox" class="jody-cb" data-key="m-d-help-j"></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- MEDIGAP -->
+  <div class="card">
+    <div class="card-header"><div class="card-icon blue">🛡️</div><h2>Medigap — Supplement Insurance (If Using Original Medicare)</h2></div>
+    <div class="alert warn" style="margin:0.7rem 1.2rem 0.3rem;">
+      <strong>Time-sensitive:</strong> Each person has a 6-month window starting when they are 65+ AND enrolled in Part B. After it closes, insurers can refuse you or charge more.
+    </div>
+    <table class="task-table">
+      <thead><tr>
+        <th>Task</th>
+        <th class="steve-col">Steve</th>
+        <th class="jody-col">Jody</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td class="task-cell">
+            <div class="task-desc">Decide if you want Medigap (reduces your out-of-pocket costs from Original Medicare)</div>
+            <div class="task-note">Cannot have Medigap AND Medicare Advantage — choose one.</div>
+          </td>
+          <td class="check-cell"><input type="checkbox" class="steve-cb" data-key="m-mg-decide-s"></td>
+          <td class="check-cell"><input type="checkbox" class="jody-cb" data-key="m-mg-decide-j"></td>
+        </tr>
+        <tr>
+          <td class="task-cell">
+            <div class="task-desc">Shop for Medigap plans at <a href="https://www.medicare.gov/health-drug-plans/medigap" target="_blank">medicare.gov/health-drug-plans/medigap</a></div>
+            <div class="task-note">Do this WITHIN your 6-month open enrollment window to get guaranteed acceptance regardless of health status.</div>
+          </td>
+          <td class="check-cell"><input type="checkbox" class="steve-cb" data-key="m-mg-shop-s"></td>
+          <td class="check-cell"><input type="checkbox" class="jody-cb" data-key="m-mg-shop-j"></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- AFTER ENROLLMENT -->
+  <div class="card">
+    <div class="card-header"><div class="card-icon green">✅</div><h2>After Enrollment — Don't Forget</h2></div>
+    <table class="task-table">
+      <thead><tr>
+        <th>Task</th>
+        <th class="steve-col">Steve</th>
+        <th class="jody-col">Jody</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td class="task-cell">
+            <div class="task-desc">Check if you qualify for <strong>Medicare Savings Programs</strong> (help paying premiums, deductibles, copays) at <a href="https://www.medicare.gov/basics/costs/help/medicare-savings-programs" target="_blank">medicare.gov savings programs</a></div>
+          </td>
+          <td class="check-cell"><input type="checkbox" class="steve-cb" data-key="m-savings-s"></td>
+          <td class="check-cell"><input type="checkbox" class="jody-cb" data-key="m-savings-j"></td>
+        </tr>
+        <tr>
+          <td class="task-cell">
+            <div class="task-desc">Schedule a free <strong>"Welcome to Medicare" Preventive Visit</strong> with your doctor in your first 12 months</div>
+            <div class="task-note">Covered at no cost. Includes review of medical/family history and health screenings.</div>
+          </td>
+          <td class="check-cell"><input type="checkbox" class="steve-cb" data-key="m-welcome-s"></td>
+          <td class="check-cell"><input type="checkbox" class="jody-cb" data-key="m-welcome-j"></td>
+        </tr>
+        <tr>
+          <td class="task-cell">
+            <div class="task-desc">Set a <strong>calendar reminder for October 15</strong> each year — Annual Enrollment Period opens to review/switch plans (Oct 15 – Dec 7)</div>
+          </td>
+          <td class="check-cell"><input type="checkbox" class="steve-cb" data-key="m-cal-s"></td>
+          <td class="check-cell"><input type="checkbox" class="jody-cb" data-key="m-cal-j"></td>
+        </tr>
+        <tr>
+          <td class="task-cell">
+            <div class="task-desc">Contact your <strong>free local SHIP counselor</strong> for unbiased help at <a href="https://www.shiphelp.org" target="_blank">shiphelp.org</a></div>
+          </td>
+          <td class="check-cell"><input type="checkbox" class="steve-cb" data-key="m-ship-s"></td>
+          <td class="check-cell"><input type="checkbox" class="jody-cb" data-key="m-ship-j"></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- ============================================================ -->
+<!-- SOCIAL SECURITY CHECKLIST TAB -->
+<!-- ============================================================ -->
+<div id="tab-ss" class="page-section">
+
+  <div class="alert info">
+    <strong>Jody's Social Security requires Steve to file first</strong>
+    <p>Jody can receive up to 50% of Steve's full retirement benefit as a spousal benefit — but only after Steve has filed for his own benefits. Plan the filing order and timing together.</p>
+  </div>
+
+  <!-- BEFORE APPLYING -->
+  <div class="card">
+    <div class="card-header"><div class="card-icon blue">📁</div><h2>Before Applying — Research & Prep</h2></div>
+    <table class="task-table">
+      <thead><tr>
+        <th>Task</th>
+        <th class="steve-col">Steve</th>
+        <th class="jody-col">Jody</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td class="task-cell">
+            <div class="task-desc">Create a <strong>my Social Security account</strong> at <a href="https://www.ssa.gov/myaccount" target="_blank">ssa.gov/myaccount</a> to see your earnings record and estimated benefits</div>
+          </td>
+          <td class="check-cell"><input type="checkbox" class="steve-cb" data-key="ss-myss-s"></td>
+          <td class="check-cell"><input type="checkbox" class="jody-cb" data-key="ss-myss-j"></td>
+        </tr>
+        <tr>
+          <td class="task-cell">
+            <div class="task-desc"><span class="must-steve">STEVE</span> Review your <strong>Social Security Statement</strong> online — verify all your work years and earnings are correctly recorded</div>
+            <div class="task-note">Errors in your earnings record reduce your benefit. Report errors before filing.</div>
+          </td>
+          <td class="check-cell"><input type="checkbox" class="steve-cb" data-key="ss-statement-s"></td>
+          <td class="check-cell"><div class="na-pill">N/A</div></td>
+        </tr>
+        <tr>
+          <td class="task-cell">
+            <div class="task-desc"><span class="must-steve">STEVE</span> Decide <strong>when to claim</strong> — age 62 (reduced), 67 (Full Retirement Age, born 1960+), or 70 (maximum)</div>
+            <div class="task-note">Waiting longer means a higher monthly check. Each year past FRA adds ~8% more.</div>
+          </td>
+          <td class="check-cell"><input type="checkbox" class="steve-cb" data-key="ss-timing-s"></td>
+          <td class="check-cell"><div class="na-pill">N/A</div></td>
+        </tr>
+        <tr>
+          <td class="task-cell">
+            <div class="task-desc"><span class="must-both">BOTH</span> Discuss and align on <strong>timing strategy as a couple</strong> — Jody's spousal benefit timing and Steve's filing date are connected</div>
+            <div class="task-note">A financial planner or free SHIP counselor can help model different claiming scenarios.</div>
+          </td>
+          <td class="check-cell"><input type="checkbox" class="steve-cb" data-key="ss-strat-s"></td>
+          <td class="check-cell"><input type="checkbox" class="jody-cb" data-key="ss-strat-j"></td>
+        </tr>
+        <tr>
+          <td class="task-cell">
+            <div class="task-desc">Understand how Social Security benefits are taxed — benefits may be partially taxable depending on combined income</div>
+          </td>
+          <td class="check-cell"><input type="checkbox" class="steve-cb" data-key="ss-tax-s"></td>
+          <td class="check-cell"><input type="checkbox" class="jody-cb" data-key="ss-tax-j"></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- GATHER DOCUMENTS -->
+  <div class="card">
+    <div class="card-header"><div class="card-icon blue">📄</div><h2>Documents Needed for SS Application</h2></div>
+    <div class="docs-grid" style="padding:1rem 1.2rem;">
+      <div class="doc-item">🪪 Social Security card(s)</div>
+      <div class="doc-item">📜 Birth certificate (original/certified)</div>
+      <div class="doc-item">💰 W-2 forms or tax returns (last year)</div>
+      <div class="doc-item">🏦 Bank routing + account number (for direct deposit)</div>
+      <div class="doc-item">💍 Marriage certificate (Jody needs this)</div>
+      <div class="doc-item">🌎 Proof of citizenship (if born outside U.S.)</div>
+      <div class="doc-item">🎖️ Military DD-214 (if served before 1968)</div>
+      <div class="doc-item">📋 Steve's SSN (Jody needs this for her application)</div>
+    </div>
+  </div>
+
+  <!-- STEVE APPLIES -->
+  <div class="card">
+    <div class="card-header"><div class="card-icon blue">1️⃣</div><h2>Step 1 — Steve Applies First</h2></div>
+    <table class="task-table">
+      <thead><tr>
+        <th>Task</th>
+        <th class="steve-col">Steve</th>
+        <th class="jody-col">Jody</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td class="task-cell">
+            <div class="task-desc"><span class="must-steve">STEVE</span> Apply for Social Security retirement benefits at <a href="https://www.ssa.gov/retirement/applyonline.htm" target="_blank">ssa.gov/retirement/applyonline.htm</a></div>
+            <div class="task-note">Apply up to 4 months before you want benefits to start. Must be at least 61 years and 9 months old to apply.</div>
+          </td>
+          <td class="check-cell"><input type="checkbox" class="steve-cb" data-key="ss-apply-s"></td>
+          <td class="check-cell"><div class="na-pill">N/A</div></td>
+        </tr>
+        <tr>
+          <td class="task-cell">
+            <div class="task-desc"><span class="must-steve">STEVE</span> Choose your benefit start month during the application</div>
+            <div class="task-note">Your first payment arrives the month after the one you choose.</div>
+          </td>
+          <td class="check-cell"><input type="checkbox" class="steve-cb" data-key="ss-start-s"></td>
+          <td class="check-cell"><div class="na-pill">N/A</div></td>
+        </tr>
+        <tr>
+          <td class="task-cell">
+            <div class="task-desc"><span class="must-steve">STEVE</span> Receive confirmation letter and note your expected benefit amount</div>
+          </td>
+          <td class="check-cell"><input type="checkbox" class="steve-cb" data-key="ss-confirm-s"></td>
+          <td class="check-cell"><div class="na-pill">N/A</div></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- JODY APPLIES -->
+  <div class="card">
+    <div class="card-header"><div class="card-icon pink">2️⃣</div><h2>Step 2 — Jody Applies for Spousal Benefits (After Steve Files)</h2></div>
+    <div class="alert jody-note" style="margin:0.7rem 1.2rem 0.3rem;">
+      <strong>Jody must wait until Steve is receiving benefits</strong>
+      <p>She can then receive up to 50% of Steve's full retirement age benefit. Jody must call SSA at <strong>1-800-772-1213</strong> or visit an SSA office — there is no online spousal benefit application. Use Form SSA-2.</p>
+    </div>
+    <table class="task-table">
+      <thead><tr>
+        <th>Task</th>
+        <th class="steve-col">Steve</th>
+        <th class="jody-col">Jody</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td class="task-cell">
+            <div class="task-desc"><span class="must-jody">JODY</span> Call SSA at <strong>1-800-772-1213</strong> or visit local SSA office to apply for spousal benefits — reference <strong>Form SSA-2</strong></div>
+            <div class="task-note jody">Bring your marriage certificate, Steve's SSN, your birth certificate, and your own SSN.</div>
+          </td>
+          <td class="check-cell"><div class="na-pill">N/A</div></td>
+          <td class="check-cell"><input type="checkbox" class="jody-cb" data-key="ss-apply-j"></td>
+        </tr>
+        <tr>
+          <td class="task-cell">
+            <div class="task-desc"><span class="must-jody">JODY</span> Decide when Jody will claim — at 62 (reduced, ~32.5% of Steve's benefit), or at FRA 67 (full 50%)</div>
+            <div class="task-note jody">Unlike Steve's benefit, waiting past FRA does NOT increase Jody's spousal benefit further.</div>
+          </td>
+          <td class="check-cell"><div class="na-pill">N/A</div></td>
+          <td class="check-cell"><input type="checkbox" class="jody-cb" data-key="ss-timing-j"></td>
+        </tr>
+        <tr>
+          <td class="task-cell">
+            <div class="task-desc"><span class="must-jody">JODY</span> Receive confirmation and note expected monthly benefit amount</div>
+          </td>
+          <td class="check-cell"><div class="na-pill">N/A</div></td>
+          <td class="check-cell"><input type="checkbox" class="jody-cb" data-key="ss-confirm-j"></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- AFTER APPROVAL -->
+  <div class="card">
+    <div class="card-header"><div class="card-icon green">✅</div><h2>After Approval — Both</h2></div>
+    <table class="task-table">
+      <thead><tr>
+        <th>Task</th>
+        <th class="steve-col">Steve</th>
+        <th class="jody-col">Jody</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td class="task-cell">
+            <div class="task-desc">Set up <strong>direct deposit</strong> — provide your bank routing and account number to SSA</div>
+            <div class="task-note">Required for all new benefit recipients. SSA no longer issues paper checks by default.</div>
+          </td>
+          <td class="check-cell"><input type="checkbox" class="steve-cb" data-key="ss-dd-s"></td>
+          <td class="check-cell"><input type="checkbox" class="jody-cb" data-key="ss-dd-j"></td>
+        </tr>
+        <tr>
+          <td class="task-cell">
+            <div class="task-desc">Note that <strong>Medicare Part B premiums will be automatically deducted</strong> from your SS payment each month</div>
+          </td>
+          <td class="check-cell"><input type="checkbox" class="steve-cb" data-key="ss-partb-s"></td>
+          <td class="check-cell"><input type="checkbox" class="jody-cb" data-key="ss-partb-j"></td>
+        </tr>
+        <tr>
+          <td class="task-cell">
+            <div class="task-desc">Know your <strong>payment date</strong> — based on birth date: born 1–10 = 2nd Wednesday, 11–20 = 3rd Wednesday, 21–31 = 4th Wednesday</div>
+          </td>
+          <td class="check-cell"><input type="checkbox" class="steve-cb" data-key="ss-paydate-s"></td>
+          <td class="check-cell"><input type="checkbox" class="jody-cb" data-key="ss-paydate-j"></td>
+        </tr>
+        <tr>
+          <td class="task-cell">
+            <div class="task-desc">Report any <strong>changes of address</strong> to SSA promptly at <a href="https://www.ssa.gov/myaccount" target="_blank">ssa.gov/myaccount</a> or 1-800-772-1213</div>
+          </td>
+          <td class="check-cell"><input type="checkbox" class="steve-cb" data-key="ss-change-s"></td>
+          <td class="check-cell"><input type="checkbox" class="jody-cb" data-key="ss-change-j"></td>
+        </tr>
+        <tr>
+          <td class="task-cell">
+            <div class="task-desc">Check and save your first <strong>annual COLA (Cost of Living Adjustment)</strong> notice — benefits typically increase each year</div>
+          </td>
+          <td class="check-cell"><input type="checkbox" class="steve-cb" data-key="ss-cola-s"></td>
+          <td class="check-cell"><input type="checkbox" class="jody-cb" data-key="ss-cola-j"></td>
+        </tr>
+        <tr>
+          <td class="task-cell">
+            <div class="task-desc">If either of you continues to work, understand <strong>earnings limits</strong> — income above ~$22,320/yr (2026 est.) before FRA reduces benefits temporarily</div>
+          </td>
+          <td class="check-cell"><input type="checkbox" class="steve-cb" data-key="ss-earn-s"></td>
+          <td class="check-cell"><input type="checkbox" class="jody-cb" data-key="ss-earn-j"></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- ============================================================ -->
+<!-- DEADLINES & PENALTIES TAB -->
+<!-- ============================================================ -->
+<div id="tab-deadlines" class="page-section">
+
+  <div class="card">
+    <div class="card-header"><div class="card-icon amber">📅</div><h2>Medicare Initial Enrollment Period</h2></div>
+    <div class="timeline">
+      <p style="font-size:0.85rem; color:#4b5563; margin-bottom:0.9rem;">Your IEP is 7 months centered on your 65th birthday month. Applies to both Steve and Jody separately (Jody's window is around HER 65th birthday).</p>
+      <div class="timeline-row">
+        <div class="timeline-label">3 months before</div>
+        <div class="timeline-bar ok">Window opens — <strong>best time to sign up</strong> for Part B coverage to start exactly on your birthday month<small> Sign up here → Part B starts on your birthday month</small></div>
+      </div>
+      <div class="timeline-row">
+        <div class="timeline-label">Birthday month</div>
+        <div class="timeline-bar ok">Still fine — Part B starts the following month<small>One month delay in coverage start</small></div>
+      </div>
+      <div class="timeline-row">
+        <div class="timeline-label">1–3 months after</div>
+        <div class="timeline-bar warn">You can still enroll but Part B starts the following month<small>Avoid if possible — consider the penalty risk</small></div>
+      </div>
+      <div class="timeline-row">
+        <div class="timeline-label">After 3 months</div>
+        <div class="timeline-bar bad"><strong>Window closes.</strong> Must wait for Jan–Mar General Enrollment Period. Lifetime Part B penalty applies.<small>Coverage won't start until the month after General Enrollment ends</small></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="card-icon red">⚠️</div><h2>Late Enrollment Penalties — Permanent Monthly Costs</h2></div>
+    <div class="penalty-row">
+      <div class="penalty-card">
+        <h4>Part B Penalty</h4>
+        <div class="amount">+10% / year late</div>
+        <p>2-year delay = 20% added forever. On 2026's $202.90/mo: that's <strong>$40.58/month more for life</strong>. Each person pays their own penalty.</p>
+      </div>
+      <div class="penalty-card">
+        <h4>Part D Penalty</h4>
+        <div class="amount">+1% / month late</div>
+        <p>14 months late = 14% permanently added to Part D premium. Based on $38.99/mo base in 2026. Both must enroll.</p>
+      </div>
+      <div class="penalty-card">
+        <h4>Part A Penalty</h4>
+        <div class="amount">+10% premium</div>
+        <p>For those who pay a Part A premium. Applies for twice the years you were late. Steve and Jody likely qualify for free Part A, so this may not apply.</p>
+      </div>
+    </div>
+    <div class="alert info" style="margin:0 1.2rem 1rem;">
+      <strong>Exception — Creditable Employer Coverage:</strong>
+      <p>If either is covered by a current employer's health plan that is "creditable," you can delay Medicare without penalties. You get an <strong>8-month Special Enrollment Period</strong> after that coverage ends. Get written confirmation from HR.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="card-icon amber">📆</div><h2>Key Annual Dates</h2></div>
+    <div class="timeline" style="padding-top:0.8rem;">
+      <div class="timeline-row">
+        <div class="timeline-label">Jan 1 – Mar 31</div>
+        <div class="timeline-bar warn">General Enrollment Period (Parts A &amp; B) — for those who missed IEP. Coverage starts following month. Penalty applies.<small>Also: Medicare Advantage Open Enrollment for current MA enrollees only</small></div>
+      </div>
+      <div class="timeline-row">
+        <div class="timeline-label">Oct 15 – Dec 7</div>
+        <div class="timeline-bar ok">Annual Enrollment Period — switch plans, add/drop Part D, switch between Original Medicare and Advantage<small>Changes take effect Jan 1 of the following year</small></div>
+      </div>
+      <div class="timeline-row">
+        <div class="timeline-label">Dec 8 – Nov 30</div>
+        <div class="timeline-bar ok">5-Star Special Enrollment Period — switch to a 5-star rated plan once per year<small>Use medicare.gov/plan-compare to check star ratings</small></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="card-icon pink">💍</div><h2>Medigap — One-Time Window Per Person</h2></div>
+    <div style="padding:0.8rem 1.2rem; font-size:0.87rem; display:flex; flex-direction:column; gap:0.6rem;">
+      <p><strong>When:</strong> 6 months starting the first day of the month you are 65+ AND enrolled in Part B.</p>
+      <p><strong>Guaranteed rights during this window:</strong> Insurers must accept you at standard rates regardless of health conditions or pre-existing conditions.</p>
+      <p><strong>After window closes:</strong> Insurers can deny your application or charge significantly higher premiums based on health status. There is no federal guarantee they must sell to you.</p>
+      <div class="alert warn" style="margin:0;">
+        <strong>Important for Jody:</strong>
+        <p>Jody's 6-month Medigap window is tied to HER enrollment date in Part B, not Steve's. If they enroll at different times, their windows are different. Don't miss it.</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============================================================ -->
+<!-- LINKS & CONTACTS TAB -->
+<!-- ============================================================ -->
+<div id="tab-links" class="page-section">
+
+  <div class="card">
+    <div class="card-header"><div class="card-icon blue">📞</div><h2>Key Phone Numbers</h2></div>
+    <div class="phone-bar">
+      <div class="phone-item"><strong>1-800-MEDICARE (1-800-633-4227)</strong>Official Medicare helpline — 24/7. TTY: 1-877-486-2048</div>
+      <div class="phone-item"><strong>Social Security: 1-800-772-1213</strong>Apply for Medicare &amp; SS benefits. TTY: 1-800-325-0778. Also for Jody's Medicare &amp; SS application.</div>
+      <div class="phone-item"><strong>Railroad Retirees: 1-877-772-5772</strong>Railroad Retirement Board (if applicable)</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="card-icon blue">🌐</div><h2>Medicare Links</h2></div>
+    <div class="links-grid">
+      <a href="https://www.ssa.gov/medicare/sign-up" target="_blank" class="link-card">
+        <div class="lt">Apply for Medicare Online (Steve)</div>
+        <div class="ld">Official SSA online application for Parts A &amp; B — Steve only. Jody must call.</div>
+        <div class="lu">ssa.gov/medicare/sign-up</div>
+      </a>
+      <a href="https://www.ssa.gov/myaccount" target="_blank" class="link-card">
+        <div class="lt">My Social Security Account</div>
+        <div class="ld">Manage benefits, see Medicare status, view earnings record</div>
+        <div class="lu">ssa.gov/myaccount</div>
+      </a>
+      <a href="https://www.medicare.gov/plan-compare" target="_blank" class="link-card">
+        <div class="lt">Compare & Enroll in Plans</div>
+        <div class="ld">Find and compare Part D drug plans and Medicare Advantage by ZIP code. Use your medication list.</div>
+        <div class="lu">medicare.gov/plan-compare</div>
+      </a>
+      <a href="https://www.medicare.gov/health-drug-plans/medigap" target="_blank" class="link-card">
+        <div class="lt">Find a Medigap Policy</div>
+        <div class="ld">Compare Medicare Supplement insurance plans in your state</div>
+        <div class="lu">medicare.gov/health-drug-plans/medigap</div>
+      </a>
+      <a href="https://www.shiphelp.org" target="_blank" class="link-card">
+        <div class="lt">Free SHIP Counseling</div>
+        <div class="ld">State Health Insurance Assistance Program — free, local, unbiased help</div>
+        <div class="lu">shiphelp.org</div>
+      </a>
+      <a href="https://www.medicare.gov/basics/costs/help/medicare-savings-programs" target="_blank" class="link-card">
+        <div class="lt">Medicare Savings Programs</div>
+        <div class="ld">Help paying premiums, deductibles, and copays if income qualifies</div>
+        <div class="lu">medicare.gov savings programs</div>
+      </a>
+      <a href="https://www.ssa.gov/medicare/part-d-extra-help" target="_blank" class="link-card">
+        <div class="lt">Extra Help (Part D)</div>
+        <div class="ld">Low-income subsidy to reduce prescription drug plan costs</div>
+        <div class="lu">ssa.gov/medicare/part-d-extra-help</div>
+      </a>
+      <a href="https://www.medicare.gov/basics/costs/medicare-costs/avoid-penalties" target="_blank" class="link-card">
+        <div class="lt">Avoid Penalties Guide</div>
+        <div class="ld">Official Medicare page on avoiding all late enrollment penalties</div>
+        <div class="lu">medicare.gov avoid-penalties</div>
+      </a>
+      <a href="https://www.medicare.gov/publications/10050-medicare-and-you.pdf" target="_blank" class="link-card">
+        <div class="lt">Medicare & You Handbook</div>
+        <div class="ld">The full official 2026 Medicare handbook (PDF)</div>
+        <div class="lu">medicare.gov/publications/10050-medicare-and-you.pdf</div>
+      </a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="card-icon pink">🌐</div><h2>Social Security Links</h2></div>
+    <div class="links-grid">
+      <a href="https://www.ssa.gov/retirement/applyonline.htm" target="_blank" class="link-card">
+        <div class="lt">Apply for SS Benefits (Steve)</div>
+        <div class="ld">Steve's online retirement benefit application — apply up to 4 months before start date</div>
+        <div class="lu">ssa.gov/retirement/applyonline.htm</div>
+      </a>
+      <a href="https://www.ssa.gov/forms/ssa-2.html" target="_blank" class="link-card">
+        <div class="lt">Form SSA-2 (Jody)</div>
+        <div class="ld">Spouse's benefit application — Jody uses this (by phone or in-person with SSA)</div>
+        <div class="lu">ssa.gov/forms/ssa-2.html</div>
+      </a>
+      <a href="https://www.ssa.gov/myaccount" target="_blank" class="link-card">
+        <div class="lt">My Social Security Account</div>
+        <div class="ld">See earnings record, benefit estimates, manage direct deposit</div>
+        <div class="lu">ssa.gov/myaccount</div>
+      </a>
+      <a href="https://www.ssa.gov/oact/quickcalc/spouse.html" target="_blank" class="link-card">
+        <div class="lt">Spousal Benefit Calculator</div>
+        <div class="ld">Estimate Jody's spousal benefit based on Steve's benefit amount</div>
+        <div class="lu">ssa.gov/oact/quickcalc/spouse.html</div>
+      </a>
+      <a href="https://www.ssa.gov/benefits/retirement/planner/agereduction.html" target="_blank" class="link-card">
+        <div class="lt">Early Retirement Reduction</div>
+        <div class="ld">See how much benefits are reduced if claiming before full retirement age</div>
+        <div class="lu">ssa.gov/benefits/retirement/planner</div>
+      </a>
+      <a href="https://www.ssa.gov/locator" target="_blank" class="link-card">
+        <div class="lt">Find Local SSA Office</div>
+        <div class="ld">Jody needs to visit or call a local office for her Medicare and SS applications</div>
+        <div class="lu">ssa.gov/locator</div>
+      </a>
+    </div>
+  </div>
+
+  <p style="text-align:center; font-size:0.75rem; color:#9ca3af; margin-top:1rem;">
+    Sourced from Medicare.gov and SSA.gov — updated for 2026. Verify details with official sources or a SHIP counselor. Not legal or financial advice.
+  </p>
+
+</div>
+
+</main>
+
+<script>
+  // Tab navigation
+  function showTab(name) {
+    document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    event.currentTarget.classList.add('active');
+  }
+
+  // ── State helpers ──────────────────────────────────────────────
+  function getAllCheckboxes() {
+    return [...document.querySelectorAll('input[type="checkbox"][data-key]')];
+  }
+
+  function encodeState() {
+    const checked = getAllCheckboxes().filter(c => c.checked).map(c => c.dataset.key);
+    return btoa(JSON.stringify(checked));
+  }
+
+  function applyState(keys) {
+    const set = new Set(keys);
+    getAllCheckboxes().forEach(cb => {
+      cb.checked = set.has(cb.dataset.key);
+      localStorage.setItem('guide-' + cb.dataset.key, cb.checked);
+    });
+  }
+
+  // ── Progress bars ───────────────────────────────────────────────
+  function updateProgress() {
+    const allSteve = document.querySelectorAll('.steve-cb');
+    const allJody  = document.querySelectorAll('.jody-cb');
+    const steveDone = [...allSteve].filter(c => c.checked).length;
+    const jodyDone  = [...allJody].filter(c => c.checked).length;
+    const stevePct = Math.round((steveDone / allSteve.length) * 100);
+    const jodyPct  = Math.round((jodyDone  / allJody.length)  * 100);
+    document.getElementById('steve-bar').style.width = stevePct + '%';
+    document.getElementById('jody-bar').style.width  = jodyPct  + '%';
+    document.getElementById('steve-pct').textContent = stevePct + '%';
+    document.getElementById('jody-pct').textContent  = jodyPct  + '%';
+  }
+
+  // ── Load state: URL hash wins, then localStorage ────────────────
+  const hash = new URLSearchParams(location.hash.slice(1));
+  if (hash.has('s')) {
+    try { applyState(JSON.parse(atob(hash.get('s')))); } catch(e) {}
+    // clean the hash without reloading
+    history.replaceState(null, '', location.pathname);
+  } else {
+    getAllCheckboxes().forEach(cb => {
+      if (localStorage.getItem('guide-' + cb.dataset.key) === 'true') cb.checked = true;
+    });
+  }
+
+  // ── Save on every change ────────────────────────────────────────
+  getAllCheckboxes().forEach(cb => {
+    cb.addEventListener('change', () => {
+      localStorage.setItem('guide-' + cb.dataset.key, cb.checked);
+      updateProgress();
+    });
+  });
+
+  // ── Share button ────────────────────────────────────────────────
+  document.getElementById('btn-share').addEventListener('click', () => {
+    const url = location.origin + location.pathname + '#s=' + encodeState();
+    navigator.clipboard.writeText(url).then(() => {
+      const btn = document.getElementById('btn-share');
+      const orig = btn.textContent;
+      btn.textContent = '✓ Link copied!';
+      btn.style.background = '#16a34a';
+      setTimeout(() => { btn.textContent = orig; btn.style.background = ''; }, 2500);
+    });
+  });
+
+  // ── Reset button ────────────────────────────────────────────────
+  document.getElementById('btn-reset').addEventListener('click', () => {
+    if (!confirm('Reset ALL checkboxes for both Steve and Jody? This cannot be undone.')) return;
+    getAllCheckboxes().forEach(cb => {
+      cb.checked = false;
+      localStorage.removeItem('guide-' + cb.dataset.key);
+    });
+    updateProgress();
+  });
+
+  updateProgress();
+</script>
+
+</body>
+</html>
