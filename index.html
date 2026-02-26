@@ -185,6 +185,30 @@
     }
     .task-note.jody { color: #5b21b6; }
     .task-note.warn { color: #b45309; font-weight: 600; }
+    .form-chips { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.4rem; }
+    .form-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.12rem 0.45rem;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: #94a3b8;
+      cursor: pointer;
+      background: white;
+      user-select: none;
+      transition: border-color 0.1s, background 0.1s, color 0.1s;
+    }
+    .form-chip:hover { background: #f8fafc; border-color: #94a3b8; }
+    .form-chip .fc-dot { width: 6px; height: 6px; border-radius: 50%; background: #e2e8f0; flex-shrink: 0; }
+    .form-chip.fc-steve { border-color: #bfdbfe; }
+    .form-chip.fc-steve .fc-dot { background: #60a5fa; }
+    .form-chip.fc-jody  { border-color: #ddd6fe; }
+    .form-chip.fc-jody  .fc-dot { background: #a78bfa; }
+    .form-chip.fc-done  { border-color: #bbf7d0; color: #166534; background: #f0fdf4; }
+    .form-chip.fc-done  .fc-dot { background: #22c55e; }
 
     .check-cell {
       padding: 0.7rem 0.5rem;
@@ -1498,7 +1522,7 @@
           <th style="min-width:180px;">Form</th>
           <th>What It Does</th>
           <th class="center" style="width:64px; color:#93c5fd;">Steve</th>
-          <th class="center" style="width:64px; color:#f9a8d4;">Jody</th>
+          <th class="center" style="width:64px; color:#a78bfa;">Jody</th>
           <th style="min-width:120px;">How to Get It</th>
           <th style="min-width:140px;">When to Submit</th>
         </tr>
@@ -1601,7 +1625,7 @@
           <th style="min-width:180px;">Form</th>
           <th>What It Does</th>
           <th class="center" style="width:64px; color:#93c5fd;">Steve</th>
-          <th class="center" style="width:64px; color:#f9a8d4;">Jody</th>
+          <th class="center" style="width:64px; color:#a78bfa;">Jody</th>
           <th style="min-width:120px;">How to Get It</th>
           <th style="min-width:140px;">When to Submit</th>
         </tr>
@@ -1694,7 +1718,7 @@
           <th style="min-width:180px;">Document</th>
           <th>What It's For</th>
           <th class="center" style="width:64px; color:#93c5fd;">Steve</th>
-          <th class="center" style="width:64px; color:#f9a8d4;">Jody</th>
+          <th class="center" style="width:64px; color:#a78bfa;">Jody</th>
           <th style="min-width:120px;">Where to Get It</th>
           <th style="min-width:140px;">When You Need It</th>
         </tr>
@@ -1864,6 +1888,7 @@
       cb.checked = set.has(cb.dataset.key);
       localStorage.setItem('guide-' + cb.dataset.key, cb.checked);
     });
+    updateFormChips();
   }
 
   // ── Progress bars (skipped items excluded from total) ───────────
@@ -1972,6 +1997,9 @@
     btn.title = 'Mark as not going to do';
     cb.parentElement.appendChild(btn);
   });
+
+  // ── Inject form chips into linked checklist rows ─────────────────
+  initFormChips();
 
   // ── Add note buttons to each checklist row ──────────────────────
   document.querySelectorAll('tr').forEach(row => {
@@ -2102,6 +2130,96 @@
     updateProgress();
     scheduleSave();
   });
+
+  // ── Form chips — link checklist rows to their required forms ─────
+  const FORM_LABELS = {
+    'f-40b-s': 'CMS-40B',        'f-40b-j': 'CMS-40B',
+    'f-l564-s': 'CMS-L564',      'f-l564-j': 'CMS-L564',
+    'f-ma-s': 'Part C Enroll',   'f-ma-j': 'Part C Enroll',
+    'f-partd-s': 'Part D Plan',  'f-partd-j': 'Part D Plan',
+    'f-1020-s': 'SSA-1020',      'f-1020-j': 'SSA-1020',
+    'f-medigap-s': 'Medigap',    'f-medigap-j': 'Medigap',
+    'f-msp-s': 'MSP App',        'f-msp-j': 'MSP App',
+    'f-ssret-s': 'SS iClaim',
+    'f-ssa2-j': 'SSA-2',
+    'f-dd-s': 'Direct Deposit',  'f-dd-j': 'Direct Deposit',
+    'f-cred-s': 'Cred. Letter',  'f-cred-j': 'Cred. Letter',
+  };
+
+  // checklist data-key → form data-keys to show as chips in that row
+  const FORM_CHIPS_MAP = {
+    'm-apply-s':    ['f-40b-s', 'f-l564-s'],
+    'm-apply-j':    ['f-40b-j', 'f-l564-j'],
+    'm-pathc-s':    ['f-ma-s'],
+    'm-pathc-j':    ['f-ma-j'],
+    'm-d-enroll-s': ['f-partd-s'],
+    'm-d-enroll-j': ['f-partd-j'],
+    'm-d-help-s':   ['f-1020-s'],
+    'm-d-help-j':   ['f-1020-j'],
+    'm-mg-shop-s':  ['f-medigap-s'],
+    'm-mg-shop-j':  ['f-medigap-j'],
+    'm-savings-s':  ['f-msp-s'],
+    'm-savings-j':  ['f-msp-j'],
+    'ss-apply-s':   ['f-ssret-s'],
+    'ss-apply-j':   ['f-ssa2-j'],
+    'ss-dd-s':      ['f-dd-s'],
+    'ss-dd-j':      ['f-dd-j'],
+    'm-doc-cred-s': ['f-cred-s'],
+    'm-doc-cred-j': ['f-cred-j'],
+  };
+
+  function updateFormChips() {
+    document.querySelectorAll('.form-chip[data-chip-for]').forEach(chip => {
+      const formCb = document.querySelector(`input[data-key="${chip.dataset.chipFor}"]`);
+      chip.classList.toggle('fc-done', !!(formCb && formCb.checked));
+    });
+  }
+
+  function initFormChips() {
+    Object.entries(FORM_CHIPS_MAP).forEach(([cbKey, formKeys]) => {
+      const anchorCb = document.querySelector(`input[data-key="${cbKey}"]`);
+      if (!anchorCb) return;
+      const taskCell = anchorCb.closest('tr')?.querySelector('td.task-cell');
+      if (!taskCell) return;
+
+      let chipsDiv = taskCell.querySelector('.form-chips');
+      if (!chipsDiv) {
+        chipsDiv = document.createElement('div');
+        chipsDiv.className = 'form-chips';
+        taskCell.appendChild(chipsDiv);
+      }
+
+      formKeys.forEach(formKey => {
+        const formCb = document.querySelector(`input[data-key="${formKey}"]`);
+        if (!formCb) return;
+        // Skip if a chip for this form already exists in this row
+        if (chipsDiv.querySelector(`[data-chip-for="${formKey}"]`)) return;
+
+        const person = formKey.endsWith('-s') ? 'steve' : 'jody';
+        const chip = document.createElement('span');
+        chip.className = `form-chip fc-${person}`;
+        chip.dataset.chipFor = formKey;
+        chip.title = `${person === 'steve' ? 'Steve' : 'Jody'}: ${FORM_LABELS[formKey] || formKey} — click to toggle`;
+
+        const dot = document.createElement('span');
+        dot.className = 'fc-dot';
+        chip.appendChild(dot);
+        chip.appendChild(document.createTextNode(' ' + (FORM_LABELS[formKey] || formKey)));
+
+        chip.addEventListener('click', e => {
+          e.stopPropagation();
+          formCb.checked = !formCb.checked;
+          localStorage.setItem('guide-' + formKey, formCb.checked);
+          updateFormChips();
+          updateProgress();
+          scheduleSave();
+        });
+
+        chipsDiv.appendChild(chip);
+      });
+    });
+    updateFormChips();
+  }
 
   // ── Calendar ─────────────────────────────────────────────────────
   const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
