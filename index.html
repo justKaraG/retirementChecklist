@@ -1916,9 +1916,15 @@
     const key   = btn.dataset.noteKey;
     const input = document.querySelector(`.note-input[data-note-key="${key}"]`);
     if (!input) return;
-    const wasOpen = input.classList.contains('open');
-    input.classList.toggle('open', !wasOpen);
-    if (!wasOpen) input.focus();
+    // If there's content, keep it visible — just focus it
+    if (input.value.trim()) {
+      input.classList.add('open');
+      input.focus();
+    } else {
+      const wasOpen = input.classList.contains('open');
+      input.classList.toggle('open', !wasOpen);
+      if (!wasOpen) input.focus();
+    }
   });
 
   // ── Save notes on input ─────────────────────────────────────────
