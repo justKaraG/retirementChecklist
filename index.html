@@ -270,6 +270,68 @@
       font-family: inherit;
     }
     .note-input.open { display: block; }
+    /* CALENDAR TAB */
+    .year-btn {
+      padding: 0.25rem 0.9rem;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      background: white;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #64748b;
+      cursor: pointer;
+    }
+    .year-btn.active { background: #1a56db; color: white; border-color: #1a56db; }
+    .year-btn:hover:not(.active) { background: #f1f5f9; }
+    #cal-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+    @media (max-width: 680px) { #cal-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 440px) { #cal-grid { grid-template-columns: 1fr; } }
+    .cal-month { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; }
+    .cal-month-header {
+      background: #1e293b;
+      color: white;
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 0.4rem 0.6rem;
+      text-align: center;
+      letter-spacing: 0.04em;
+    }
+    .cal-inner { padding: 0.4rem; }
+    .cal-dow-row, .cal-week { display: grid; grid-template-columns: repeat(7, 1fr); }
+    .cal-dow {
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: #94a3b8;
+      text-align: center;
+      padding: 0.2rem 0;
+    }
+    .cal-day {
+      font-size: 0.72rem;
+      text-align: center;
+      padding: 0.22rem 0;
+      border-radius: 4px;
+      cursor: default;
+      position: relative;
+    }
+    .cal-day.today {
+      outline: 2px solid #1a56db;
+      outline-offset: -1px;
+      font-weight: 800;
+      z-index: 1;
+    }
+    .cal-day.empty { visibility: hidden; }
+    .cal-legend-pill {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.18rem 0.55rem;
+      border-radius: 12px;
+      font-weight: 600;
+    }
     .must-steve { font-size: 0.72rem; background: #dbeafe; color: #1e40af; border-radius: 4px; padding: 0.1rem 0.4rem; font-weight: 700; }
     .must-jody  { font-size: 0.72rem; background: #fce7f3; color: #9d174d; border-radius: 4px; padding: 0.1rem 0.4rem; font-weight: 700; }
     .must-both  { font-size: 0.72rem; background: #dcfce7; color: #166534; border-radius: 4px; padding: 0.1rem 0.4rem; font-weight: 700; }
@@ -465,6 +527,7 @@
   <div class="tab" onclick="showTab('forms')">Forms</div>
   <div class="tab" onclick="showTab('deadlines')">Deadlines & Penalties</div>
   <div class="tab" onclick="showTab('links')">All Links & Contacts</div>
+  <div class="tab" onclick="showTab('calendar')">📅 Calendar</div>
 </div>
 
 <main>
@@ -1679,6 +1742,41 @@
 
 </div>
 
+<!-- ============================================================ -->
+<!-- CALENDAR TAB                                                  -->
+<!-- ============================================================ -->
+<div id="tab-calendar" class="page-section">
+
+  <div class="card">
+    <div class="card-header"><div class="card-icon blue">📅</div><h2>Enrollment Calendar</h2></div>
+    <div style="padding:0.8rem 1.2rem 0.5rem;">
+      <p style="font-size:0.85rem;color:#4b5563;margin-bottom:1rem;">Enter birthdays to see personalized IEP &amp; Medigap windows. All enrollment periods are shaded directly on the calendar.</p>
+
+      <div style="display:flex;gap:1.2rem;flex-wrap:wrap;margin-bottom:1rem;align-items:flex-end;">
+        <label style="font-size:0.85rem;font-weight:600;color:#374151;display:flex;flex-direction:column;gap:0.2rem;">
+          Steve's birthday
+          <input type="date" id="steve-bday" style="font-size:0.85rem;border:1px solid #e2e8f0;border-radius:6px;padding:0.3rem 0.5rem;color:#1a202c;">
+        </label>
+        <label style="font-size:0.85rem;font-weight:600;color:#374151;display:flex;flex-direction:column;gap:0.2rem;">
+          Jody's birthday
+          <input type="date" id="jody-bday" style="font-size:0.85rem;border:1px solid #e2e8f0;border-radius:6px;padding:0.3rem 0.5rem;color:#1a202c;">
+        </label>
+        <div>
+          <div style="font-size:0.85rem;font-weight:600;color:#374151;margin-bottom:0.2rem;">Year</div>
+          <div style="display:flex;gap:0.4rem;">
+            <button class="year-btn active" data-year="2026" onclick="setCalYear(2026,this)">2026</button>
+            <button class="year-btn" data-year="2027" onclick="setCalYear(2027,this)">2027</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="cal-legend" style="display:flex;flex-wrap:wrap;gap:0.45rem;margin-bottom:1.1rem;font-size:0.77rem;"></div>
+      <div id="cal-grid"></div>
+    </div>
+  </div>
+
+</div>
+
 </main>
 
 <script>
@@ -2015,6 +2113,223 @@
     updateProgress();
     scheduleSave();
   });
+
+  // ── Calendar ─────────────────────────────────────────────────────
+  const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const DOW = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+
+  // Fixed enrollment windows (year-independent labels, concrete date ranges)
+  const CAL_BASE_EVENTS = [
+    {
+      id: 'steve-retire',
+      label: "Steve's Coverage Ends (retirement)",
+      note: '8-month Special Enrollment Period begins — enroll in Part B within 8 months to avoid penalty.',
+      bg: '#dbeafe', text: '#1e40af', border: '#3b82f6',
+      ranges: [['2026-03-01','2026-03-01']], dot: true
+    },
+    {
+      id: 'steve-sep',
+      label: "Steve's 8-Month SEP Window",
+      note: 'Must enroll in Part B by Oct 31, 2026 to avoid lifetime late penalty.',
+      bg: '#eff6ff', text: '#1e40af', border: '#93c5fd',
+      ranges: [['2026-03-01','2026-10-31']]
+    },
+    {
+      id: 'jody-ssa',
+      label: "Jody's SSA Interview",
+      note: 'Bring marriage cert, SS cards, birth certs. April 23, 2026.',
+      bg: '#fce7f3', text: '#9d174d', border: '#ec4899',
+      ranges: [['2026-04-23','2026-04-23']], dot: true
+    },
+    {
+      id: 'gep',
+      label: 'General Enrollment Period (Parts A & B)',
+      note: 'For those who missed IEP. Late penalty applies. Jan 1 – Mar 31.',
+      bg: '#fefce8', text: '#713f12', border: '#eab308',
+      ranges: [['2026-01-01','2026-03-31'],['2027-01-01','2027-03-31']]
+    },
+    {
+      id: 'aep',
+      label: 'Annual Enrollment (switch plans)',
+      note: 'Switch plans, add/drop Part D. Oct 15 – Dec 7.',
+      bg: '#f0fdf4', text: '#166534', border: '#86efac',
+      ranges: [['2026-10-15','2026-12-07'],['2027-10-15','2027-12-07']]
+    },
+  ];
+
+  let calYear = 2026;
+
+  function fmtDate(y, m, d) {
+    return y + '-' + String(m+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+  }
+
+  function getIEP(bdayVal) {
+    // bdayVal = "YYYY-MM-DD"
+    const [by, bm] = bdayVal.split('-').map(Number);
+    const y65 = by + 65;  // year they turn 65
+    const mIdx = bm - 1;  // 0-based birthday month
+    const start = new Date(y65, mIdx - 3, 1);
+    const end   = new Date(y65, mIdx + 4, 0);  // day 0 = last day of prev month
+    return [fmtDate(start.getFullYear(), start.getMonth(), start.getDate()),
+            fmtDate(end.getFullYear(),   end.getMonth(),   end.getDate())];
+  }
+
+  function getMedigap(bdayVal) {
+    const [by, bm] = bdayVal.split('-').map(Number);
+    const y65  = by + 65;
+    const mIdx = bm - 1;
+    const start = new Date(y65, mIdx, 1);
+    const end   = new Date(y65, mIdx + 6, 0);
+    return [fmtDate(start.getFullYear(), start.getMonth(), start.getDate()),
+            fmtDate(end.getFullYear(),   end.getMonth(),   end.getDate())];
+  }
+
+  function buildCalEvents() {
+    const events = CAL_BASE_EVENTS.map(e => ({...e, ranges: e.ranges.map(r => [...r])}));
+    const steveBday = document.getElementById('steve-bday')?.value;
+    const jodyBday  = document.getElementById('jody-bday')?.value;
+    if (steveBday) {
+      const [s, e] = getIEP(steveBday);
+      events.push({ id:'steve-iep', label:"Steve's IEP (Medicare)", note:'7-month Initial Enrollment Period.', bg:'#dbeafe', text:'#1e3a8a', border:'#60a5fa', ranges:[[s,e]] });
+      const [ms, me] = getMedigap(steveBday);
+      events.push({ id:'steve-mg', label:"Steve's Medigap Window", note:'Guaranteed acceptance — do not miss.', bg:'#e0e7ff', text:'#3730a3', border:'#818cf8', ranges:[[ms,me]] });
+    }
+    if (jodyBday) {
+      const [s, e] = getIEP(jodyBday);
+      events.push({ id:'jody-iep', label:"Jody's IEP (Medicare)", note:'7-month Initial Enrollment Period.', bg:'#fce7f3', text:'#831843', border:'#f9a8d4', ranges:[[s,e]] });
+      const [ms, me] = getMedigap(jodyBday);
+      events.push({ id:'jody-mg', label:"Jody's Medigap Window", note:'Guaranteed acceptance — do not miss.', bg:'#fdf4ff', text:'#7e22ce', border:'#d8b4fe', ranges:[[ms,me]] });
+    }
+    return events;
+  }
+
+  function renderCalMonth(year, monthIdx, events) {
+    const wrap = document.createElement('div');
+    wrap.className = 'cal-month';
+
+    const hdr = document.createElement('div');
+    hdr.className = 'cal-month-header';
+    hdr.textContent = MONTH_NAMES[monthIdx] + ' ' + year;
+    wrap.appendChild(hdr);
+
+    const inner = document.createElement('div');
+    inner.className = 'cal-inner';
+
+    // Day-of-week header row
+    const dowRow = document.createElement('div');
+    dowRow.className = 'cal-dow-row';
+    DOW.forEach(d => {
+      const c = document.createElement('div');
+      c.className = 'cal-dow';
+      c.textContent = d;
+      dowRow.appendChild(c);
+    });
+    inner.appendChild(dowRow);
+
+    const daysInMonth = new Date(year, monthIdx + 1, 0).getDate();
+    const firstDow    = new Date(year, monthIdx, 1).getDay();
+    const today       = new Date();
+
+    let week = document.createElement('div');
+    week.className = 'cal-week';
+
+    // leading blanks
+    for (let i = 0; i < firstDow; i++) {
+      const c = document.createElement('div');
+      c.className = 'cal-day empty';
+      c.textContent = '.';
+      week.appendChild(c);
+    }
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      const ds  = fmtDate(year, monthIdx, day);
+      const hit = events.filter(ev => ev.ranges.some(([s,e]) => ds >= s && ds <= e));
+
+      const c = document.createElement('div');
+      c.className = 'cal-day';
+      c.textContent = day;
+
+      if (year === today.getFullYear() && monthIdx === today.getMonth() && day === today.getDate())
+        c.classList.add('today');
+
+      if (hit.length) {
+        // Layer colors: first event wins background, extra events show as bottom border strip
+        c.style.background   = hit[0].bg;
+        c.style.color        = hit[0].text;
+        c.style.fontWeight   = '700';
+        if (hit.length > 1) c.style.boxShadow = `inset 0 -3px 0 ${hit[1].border}`;
+        if (hit.length > 2) c.style.outline   = `1px solid ${hit[2].border}`;
+        c.title = hit.map(ev => ev.label + (ev.note ? ' — ' + ev.note : '')).join('\n');
+      }
+
+      // Dot events (single-day) get a ring treatment
+      const dotHit = hit.find(ev => ev.dot);
+      if (dotHit) {
+        c.style.outline      = `2px solid ${dotHit.border}`;
+        c.style.outlineOffset = '0px';
+      }
+
+      week.appendChild(c);
+
+      // New week row after Saturday or last day
+      const posInWeek = (firstDow + day - 1) % 7;
+      if (posInWeek === 6 || day === daysInMonth) {
+        inner.appendChild(week);
+        week = document.createElement('div');
+        week.className = 'cal-week';
+      }
+    }
+
+    wrap.appendChild(inner);
+    return wrap;
+  }
+
+  function renderCalendar() {
+    const grid   = document.getElementById('cal-grid');
+    const legend = document.getElementById('cal-legend');
+    if (!grid) return;
+
+    const events = buildCalEvents();
+
+    // Legend
+    legend.innerHTML = '';
+    events.forEach(ev => {
+      const pill = document.createElement('div');
+      pill.className = 'cal-legend-pill';
+      pill.style.cssText = `background:${ev.bg};border:1px solid ${ev.border};color:${ev.text};`;
+      pill.textContent = ev.label;
+      legend.appendChild(pill);
+    });
+
+    // Months
+    grid.innerHTML = '';
+    for (let m = 0; m < 12; m++) grid.appendChild(renderCalMonth(calYear, m, events));
+  }
+
+  function setCalYear(year, btn) {
+    calYear = year;
+    document.querySelectorAll('.year-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderCalendar();
+  }
+
+  // Re-render when birthdays change
+  ['steve-bday','jody-bday'].forEach(id => {
+    document.getElementById(id)?.addEventListener('change', () => {
+      const map = { steveBday: document.getElementById('steve-bday').value, jodyBday: document.getElementById('jody-bday').value };
+      localStorage.setItem('cal-birthdays', JSON.stringify(map));
+      renderCalendar();
+    });
+  });
+
+  // Restore saved birthdays
+  try {
+    const saved = JSON.parse(localStorage.getItem('cal-birthdays') || '{}');
+    if (saved.steveBday) document.getElementById('steve-bday').value = saved.steveBday;
+    if (saved.jodyBday)  document.getElementById('jody-bday').value  = saved.jodyBday;
+  } catch(e) {}
+
+  renderCalendar();
 
   // ── Init ────────────────────────────────────────────────────────
   loadFromGitHub();
